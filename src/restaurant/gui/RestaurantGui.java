@@ -40,29 +40,30 @@ public class RestaurantGui extends JFrame implements ActionListener {
      * Sets up all the gui components.
      */
     public RestaurantGui() {
-        int WINDOWX = 750;
+        int WINDOWX = 1450;
         int winx = 450;
         int space = 50;
         int WINDOWY = 350;
+        int winy = 700;
 
-       /* animationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        animationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         animationFrame.setBounds(winx, winx , winx, WINDOWY);
         animationFrame.setVisible(true);
-    	animationFrame.add(animationPanel); */
+    	animationFrame.add(animationPanel); 
     	
     	
-    	setBounds(space, space, WINDOWX, 700);
+    	setBounds(space, space, WINDOWX, WINDOWY);
 
         setLayout(new BoxLayout((Container) getContentPane(), 
-        		BoxLayout.Y_AXIS));
+        		BoxLayout.X_AXIS));
 
-        Dimension restDim = new Dimension(WINDOWX, (int) (WINDOWY * .95));
+        Dimension restDim = new Dimension((int) (WINDOWX*.35), (int) (WINDOWY*.65));
         restPanel.setPreferredSize(restDim);
         restPanel.setMinimumSize(restDim);
         restPanel.setMaximumSize(restDim);
         add(restPanel);
         
-        add(animationPanel);
+        //add(animationPanel);
         // Now, setup the info panel
         Dimension infoDim = new Dimension(winx, (int) (WINDOWY * .25));
         infoPanel = new JPanel();
@@ -86,15 +87,15 @@ public class RestaurantGui extends JFrame implements ActionListener {
         infoLabel.setText("<html><pre><i>Click Add to make customers</i></pre></html>");
         infoPanel.add(infoLabel);
         infoPanel.add(stateCB);
-       // add(infoPanel);
+     //  add(infoPanel);
         
         myinfo = new JLabel();
         myinfo.setText("<html><pre>My name is Robert Trent Jones</pre></html>");
-       // add(myinfo);
+        add(myinfo);
         
         pic = new ImageIcon("image/photo.jpg");
         picture = new JLabel(pic);
-        //add(picture);
+        add(picture);
         }
     
     /**
