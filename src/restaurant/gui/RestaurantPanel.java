@@ -4,6 +4,7 @@ import restaurant.CustomerAgent;
 import restaurant.HostAgent;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Vector;
@@ -25,6 +26,11 @@ public class RestaurantPanel extends JPanel {
     private JPanel group = new JPanel();
 
     private RestaurantGui gui; //reference to main gui
+    
+    private int Gridwidth=1;
+    private int two=2;
+    private int ten=10;
+    private int twenty=20;
 
     public RestaurantPanel(RestaurantGui gui) {
         this.gui = gui;
@@ -33,8 +39,8 @@ public class RestaurantPanel extends JPanel {
         gui.animationPanel.addGui(hostGui);
         host.startThread();
 
-        setLayout(new GridLayout(1, 2, 20, 20));
-        group.setLayout(new GridLayout(1, 2, 10, 10));
+        setLayout(new GridLayout(Gridwidth, two, twenty, twenty));
+        group.setLayout(new GridLayout(Gridwidth, two, ten, ten));
 
         group.add(customerPanel);
 
@@ -43,6 +49,10 @@ public class RestaurantPanel extends JPanel {
         add(group);
     }
 
+    public int getsize(){
+    	return customers.size();
+    }
+    
     /**
      * Sets up the restaurant label that includes the menu,
      * and host and cook information
@@ -68,17 +78,43 @@ public class RestaurantPanel extends JPanel {
      * @param type indicates whether the person is a customer or waiter
      * @param name name of person
      */
-    public void showInfo(String type, String name) {
+  /*  public void showInfo(String type, String name) {
 
         if (type.equals("Customers")) {
 
             for (int i = 0; i < customers.size(); i++) {
                 CustomerAgent temp = customers.get(i);
-                if (temp.getName() == name)
-                    gui.updateInfoPanel(temp);
+                JCheckBox tempalso = customerPanel.stateCB2.get(i);
+                
+                tempalso.setSelected(temp.getGui().isHungry());
+                //Is customer hungry? Hack. Should ask customerGui
+                tempalso.setEnabled(!temp.getGui().isHungry());
+              // Hack. Should ask customerGui
+                
+                
+              //  if (temp.getName() == name)
+               //     gui.updateInfoPanel(temp);
             }
         }
+    }*/
+    
+    public void findcust(CustomerAgent c){
+    	CustomerAgent temp = new CustomerAgent("Ted");
+        for (int i = 0; i < customers.size(); i++) {
+        	temp=customers.get(i);
+        	if (temp==c){
+        		customerPanel.enable(i);
+        	}
+        }
     }
+    
+    public void actionTime(int i) {
+    	
+        		 CustomerAgent temp = new CustomerAgent("Ted");
+        		 temp=customers.get(i);
+                 temp.getGui().setHungry();
+    }
+        
 
     /**
      * Adds a customer or waiter to the appropriate list

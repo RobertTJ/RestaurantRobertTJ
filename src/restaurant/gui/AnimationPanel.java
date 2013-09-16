@@ -10,8 +10,13 @@ import java.util.ArrayList;
 
 public class AnimationPanel extends JPanel implements ActionListener {
 
-    private final int WINDOWX = 450;
+    private final int WINDOWX = 750;
     private final int WINDOWY = 350;
+    private final int zero = 0;
+    private final int twenty = 20;
+    private final int fifty = 50;
+    private final int twohun = 200;
+    private final int twofifty = 250;
     private Image bufferImage;
     private Dimension bufferSize;
 
@@ -23,7 +28,7 @@ public class AnimationPanel extends JPanel implements ActionListener {
         
         bufferSize = this.getSize();
  
-    	Timer timer = new Timer(20, this );
+    	Timer timer = new Timer(twenty, this );
     	timer.start();
     }
 
@@ -36,11 +41,11 @@ public class AnimationPanel extends JPanel implements ActionListener {
 
         //Clear the screen by painting a rectangle the size of the frame
         g2.setColor(getBackground());
-        g2.fillRect(0, 0, WINDOWX, WINDOWY );
+        g2.fillRect(zero, zero, WINDOWX, WINDOWY );
 
         //Here is the table
         g2.setColor(Color.ORANGE);
-        g2.fillRect(200, 250, 50, 50);//200 and 250 need to be table params
+        g2.fillRect(twohun, twofifty, fifty, fifty);//200 and 250 need to be table params
 
 
         for(Gui gui : guis) {

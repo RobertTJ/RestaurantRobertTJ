@@ -5,6 +5,10 @@ import restaurant.HostAgent;
 
 import java.awt.*;
 
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import java.awt.image.BufferedImage;
+
 public class CustomerGui implements Gui{
 
 	private CustomerAgent agent = null;
@@ -18,16 +22,23 @@ public class CustomerGui implements Gui{
 	private int xDestination, yDestination;
 	private enum Command {noCommand, GoToSeat, LeaveRestaurant};
 	private Command command=Command.noCommand;
+	private int offscreenfourty = -40;
+	private int shifttwenty = 20;
+	private JLabel picture;
+    private ImageIcon pic;
+    private BufferedImage image;
+
+    
 
 	public static final int xTable = 200;
 	public static final int yTable = 250;
 
 	public CustomerGui(CustomerAgent c, RestaurantGui gui){ //HostAgent m) {
 		agent = c;
-		xPos = -40;
-		yPos = -40;
-		xDestination = -40;
-		yDestination = -40;
+		xPos = offscreenfourty;
+		yPos = offscreenfourty;
+		xDestination = offscreenfourty;
+		yDestination = offscreenfourty;
 		//maitreD = m;
 		this.gui = gui;
 	}
@@ -57,7 +68,10 @@ public class CustomerGui implements Gui{
 
 	public void draw(Graphics2D g) {
 		g.setColor(Color.GREEN);
-		g.fillRect(xPos, yPos, 20, 20);
+		g.fillRect(xPos, yPos, shifttwenty, shifttwenty);
+	//	image=ImageIO.read(new File("image/customerstickfigure.jpg"));
+		//pic = new ImageIcon("image/customerstickfigure.jpg");
+	    //picture = new JLabel(pic);
 	}
 
 	public boolean isPresent() {
@@ -83,8 +97,8 @@ public class CustomerGui implements Gui{
 	}
 
 	public void DoExitRestaurant() {
-		xDestination = -40;
-		yDestination = -40;
+		xDestination = offscreenfourty;
+		yDestination = offscreenfourty;
 		command = Command.LeaveRestaurant;
 	}
 }

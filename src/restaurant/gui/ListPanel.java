@@ -4,10 +4,12 @@ import restaurant.CustomerAgent;
 import restaurant.HostAgent;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Vector;
 
 /**
  * Subpanel of restaurantPanel.
@@ -24,6 +26,18 @@ public class ListPanel extends JPanel implements ActionListener {
 
     private RestaurantPanel restPanel;
     private String type;
+    private JTextField newcustomer;
+    private JPanel entryline;
+    List<JCheckBox> stateCB2 = new ArrayList<JCheckBox>();
+    private int k=0;
+    private int textwidth = 200;
+    private int textheight = 24;
+    private int one = 1;
+    private int oneten = 110;
+    private int seven = 7;
+    private int rows = 0;
+    private int columns = 2;
+
 
     /**
      * Constructor for ListPanel.  Sets up all the gui
@@ -38,10 +52,25 @@ public class ListPanel extends JPanel implements ActionListener {
         setLayout(new BoxLayout((Container) this, BoxLayout.Y_AXIS));
         add(new JLabel("<html><pre> <u>" + type + "</u><br></pre></html>"));
 
-        addPersonB.addActionListener(this);
-        add(addPersonB);
+        entryline = new JPanel();
+        entryline.setLayout(new BoxLayout(entryline, BoxLayout.X_AXIS));
+        
+        newcustomer = new JTextField(one);
+        newcustomer.setPreferredSize( new Dimension( textwidth,textheight ) );
+        newcustomer.setMinimumSize( new Dimension( textwidth, textheight ) );
+        newcustomer.setMaximumSize( new Dimension( textwidth, textheight ) );
 
-        view.setLayout(new BoxLayout((Container) view, BoxLayout.Y_AXIS));
+
+        entryline.add(newcustomer);
+        
+        
+        addPersonB.addActionListener(this);
+        entryline.add(addPersonB);
+        
+       
+        add(entryline);
+
+        view.setLayout(new GridLayout(rows,columns));
         pane.setViewportView(view);
         add(pane);
     }
@@ -53,17 +82,42 @@ public class ListPanel extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == addPersonB) {
         	// Chapter 2.19 describes showInputDialog()
-            addPerson(JOptionPane.showInputDialog("Please enter a name:"));
+            addPerson(newcustomer.getText());
         }
+        
+        
+       
         else {
-        	// Isn't the second for loop more beautiful?
-            /*for (int i = 0; i < list.size(); i++) {
-                JButton temp = list.get(i);*/
+        	for  (int i = 0; i < list.size(); i++) {
+     		   JCheckBox tempalso = new JCheckBox();
+     		   tempalso=stateCB2.get(i);
+     		  
+               if (e.getSource() == tempalso) { 
+            	   restPanel.actionTime(i);
+                   tempalso.setEnabled(false);                 
+                   }
+               }
+        }
+        
+        
+        
+      /*  else {
+        	
         	for (JButton temp:list){
                 if (e.getSource() == temp)
                     restPanel.showInfo(type, temp.getText());
+                //noted - not needed for lab 2, displays info on bottom, moving to right
             }
         }
+      */
+    }
+    
+    
+    public void enable(int i) {
+    	JCheckBox temp=new JCheckBox();
+    	temp = stateCB2.get(i);
+    	temp.setEnabled(true);
+        temp.setSelected(false);
     }
 
     /**
@@ -75,21 +129,36 @@ public class ListPanel extends JPanel implements ActionListener {
      */
     public void addPerson(String name) {
         if (name != null) {
+        	k=k+1;
             JButton button = new JButton(name);
             button.setBackground(Color.white);
 
             Dimension paneSize = pane.getSize();
-            Dimension buttonSize = new Dimension(paneSize.width - 20,
-                    (int) (paneSize.height / 7));
+            Dimension buttonSize = new Dimension(paneSize.width - oneten,
+                    (int) (paneSize.height / seven));
             button.setPreferredSize(buttonSize);
             button.setMinimumSize(buttonSize);
             button.setMaximumSize(buttonSize);
             button.addActionListener(this);
             list.add(button);
             view.add(button);
+            
+            JCheckBox checkit = new JCheckBox("Hungry?"); 
+            checkit.setVisible(true);
+            checkit.addActionListener(this);
+            
+            stateCB2.add(checkit);
+            view.add(checkit);
+            
             restPanel.addPerson(type, name);//puts customer on list
-            restPanel.showInfo(type, name);//puts hungry button on panel
+           // restPanel.showInfo(type, name);//puts hungry button on panel
+
+            
             validate();
         }
     }
+    
+    
+    
+    
 }

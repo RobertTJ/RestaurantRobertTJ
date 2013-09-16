@@ -12,6 +12,7 @@ public class HostGui implements Gui {
 
     private int xPos = -20, yPos = -20;//default waiter position
     private int xDestination = -20, yDestination = -20;//default start position
+    private int shifttwenty = 20;
 
     public static final int xTable = 200;
     public static final int yTable = 250;
@@ -20,6 +21,8 @@ public class HostGui implements Gui {
         this.agent = agent;
     }
 
+    
+    
     public void updatePosition() {
         if (xPos < xDestination)
             xPos++;
@@ -32,14 +35,14 @@ public class HostGui implements Gui {
             yPos--;
 
         if (xPos == xDestination && yPos == yDestination
-        		& (xDestination == xTable + 20) & (yDestination == yTable - 20)) {
+        		& (xDestination == xTable + shifttwenty) & (yDestination == yTable - shifttwenty)) {
            agent.msgAtTable();
         }
     }
 
     public void draw(Graphics2D g) {
         g.setColor(Color.MAGENTA);
-        g.fillRect(xPos, yPos, 20, 20);
+        g.fillRect(xPos, yPos, shifttwenty, shifttwenty);
     }
 
     public boolean isPresent() {
@@ -47,13 +50,14 @@ public class HostGui implements Gui {
     }
 
     public void DoBringToTable(CustomerAgent customer) {
-        xDestination = xTable + 20;
-        yDestination = yTable - 20;
+        xDestination = xTable + shifttwenty;
+        yDestination = yTable - shifttwenty;
+        //needs to be changed based on what table they are going to, interacts with host agent
     }
 
     public void DoLeaveCustomer() {
-        xDestination = -20;
-        yDestination = -20;
+        xDestination = -shifttwenty;
+        yDestination = -shifttwenty;
     }
 
     public int getXPos() {

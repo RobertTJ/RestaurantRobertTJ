@@ -27,6 +27,10 @@ public class RestaurantGui extends JFrame implements ActionListener {
     private JPanel infoPanel;
     private JLabel infoLabel; //part of infoPanel
     private JCheckBox stateCB;//part of infoLabel
+    private JPanel adder;
+    private JLabel myinfo;
+    private JLabel picture;
+    private ImageIcon pic;
 
     private Object currentPerson;/* Holds the agent that the info is about.
     								Seems like a hack */
@@ -36,27 +40,31 @@ public class RestaurantGui extends JFrame implements ActionListener {
      * Sets up all the gui components.
      */
     public RestaurantGui() {
-        int WINDOWX = 450;
+        int WINDOWX = 750;
+        int winx = 450;
+        int space = 50;
         int WINDOWY = 350;
 
-        animationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        animationFrame.setBounds(100+WINDOWX, 50 , WINDOWX+100, WINDOWY+100);
+       /* animationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        animationFrame.setBounds(winx, winx , winx, WINDOWY);
         animationFrame.setVisible(true);
-    	animationFrame.add(animationPanel); 
+    	animationFrame.add(animationPanel); */
     	
-    	setBounds(50, 50, WINDOWX, WINDOWY);
+    	
+    	setBounds(space, space, WINDOWX, 700);
 
         setLayout(new BoxLayout((Container) getContentPane(), 
         		BoxLayout.Y_AXIS));
 
-        Dimension restDim = new Dimension(WINDOWX, (int) (WINDOWY * .6));
+        Dimension restDim = new Dimension(WINDOWX, (int) (WINDOWY * .95));
         restPanel.setPreferredSize(restDim);
         restPanel.setMinimumSize(restDim);
         restPanel.setMaximumSize(restDim);
         add(restPanel);
         
+        add(animationPanel);
         // Now, setup the info panel
-        Dimension infoDim = new Dimension(WINDOWX, (int) (WINDOWY * .25));
+        Dimension infoDim = new Dimension(winx, (int) (WINDOWY * .25));
         infoPanel = new JPanel();
         infoPanel.setPreferredSize(infoDim);
         infoPanel.setMinimumSize(infoDim);
@@ -67,22 +75,37 @@ public class RestaurantGui extends JFrame implements ActionListener {
         stateCB.setVisible(false);
         stateCB.addActionListener(this);
 
-        infoPanel.setLayout(new GridLayout(1, 2, 30, 0));
+        int one = 1;
+        int two=2;
+        int thirty=30;
+        int zero=0;
+        
+        infoPanel.setLayout(new GridLayout(one, two, thirty, zero));
         
         infoLabel = new JLabel(); 
         infoLabel.setText("<html><pre><i>Click Add to make customers</i></pre></html>");
         infoPanel.add(infoLabel);
         infoPanel.add(stateCB);
-        add(infoPanel);
-    }
+       // add(infoPanel);
+        
+        myinfo = new JLabel();
+        myinfo.setText("<html><pre>My name is Robert Trent Jones</pre></html>");
+       // add(myinfo);
+        
+        pic = new ImageIcon("image/photo.jpg");
+        picture = new JLabel(pic);
+        //add(picture);
+        }
+    
     /**
      * updateInfoPanel() takes the given customer (or, for v3, Host) object and
      * changes the information panel to hold that person's info.
      *
      * @param person customer (or waiter) object
      */
-    public void updateInfoPanel(Object person) {
-        stateCB.setVisible(true);
+   /* public void updateInfoPanel(Object person) {
+    	
+    	stateCB.setVisible(true);
         currentPerson = person;
 
         if (person instanceof CustomerAgent) {
@@ -97,7 +120,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
                "<html><pre>     Name: " + customer.getName() + " </pre></html>");
         }
         infoPanel.validate();
-    }
+    }*/
     /**
      * Action listener method that reacts to the checkbox being clicked;
      * If it's the customer's checkbox, it will make him hungry
@@ -119,13 +142,14 @@ public class RestaurantGui extends JFrame implements ActionListener {
      * @param c reference to the customer
      */
     public void setCustomerEnabled(CustomerAgent c) {
-        if (currentPerson instanceof CustomerAgent) {
+      /*  if (currentPerson instanceof CustomerAgent) {
             CustomerAgent cust = (CustomerAgent) currentPerson;
             if (c.equals(cust)) {
-                stateCB.setEnabled(true);
-                stateCB.setSelected(false);
+               // stateCB.setEnabled(true);
+               // stateCB.setSelected(false);
             }
-        }
+        }*/
+        restPanel.findcust(c);
     }
     /**
      * Main routine to get gui started
@@ -134,7 +158,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
         RestaurantGui gui = new RestaurantGui();
         gui.setTitle("csci201 Restaurant");
         gui.setVisible(true);
-        gui.setResizable(false);
+        gui.setResizable(true);
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 }
