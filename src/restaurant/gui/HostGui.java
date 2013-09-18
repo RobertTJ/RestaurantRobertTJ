@@ -14,8 +14,14 @@ public class HostGui implements Gui {
     private int xDestination = -20, yDestination = -20;//default start position
     private int shifttwenty = 20;
 
-    public static final int xTable = 200;
-    public static final int yTable = 250;
+    public static final int xTable1 = 200;
+    public static final int yTable1 = 250;
+    
+    public static final int xTable2 = 420;
+    public static final int yTable2 = 250;
+    
+    public static final int xTable3 = 640;
+    public static final int yTable3 = 250;
 
     public HostGui(HostAgent agent) {
         this.agent = agent;
@@ -39,8 +45,20 @@ public class HostGui implements Gui {
             yPos--;
 
         if (xPos == xDestination && yPos == yDestination
-        		& (xDestination == xTable + shifttwenty) & (yDestination == yTable - shifttwenty)) {
+        		& (xDestination == xTable1 + shifttwenty) & (yDestination == yTable1 - shifttwenty)) {
            agent.msgAtTable();
+        }
+        else if (xPos == xDestination && yPos == yDestination
+        		& (xDestination == xTable2 + shifttwenty) & (yDestination == yTable2 - shifttwenty)) {
+           agent.msgAtTable();
+        }
+        else if (xPos == xDestination && yPos == yDestination
+        		& (xDestination == xTable3 + shifttwenty) & (yDestination == yTable3 - shifttwenty)) {
+           agent.msgAtTable();
+        }
+        else if (xPos == xDestination && yPos == yDestination
+        		& (xDestination ==-shifttwenty) & (yDestination == - shifttwenty)) {
+           agent.msgAtFront();
         }
     }
 
@@ -53,9 +71,27 @@ public class HostGui implements Gui {
         return true;
     }
 
-    public void DoBringToTable(CustomerAgent customer) {
-        xDestination = xTable + shifttwenty;
-        yDestination = yTable - shifttwenty;
+    public void DoBringToTable(CustomerAgent customer, int n) {
+        if (n==1){
+        	xDestination = xTable1 + shifttwenty;
+            yDestination = yTable1 - shifttwenty;
+            customer.msgGoToDest(xTable1,yTable1);
+
+        }
+        else if (n==2){
+        	xDestination = xTable2 + shifttwenty;
+            yDestination = yTable2 - shifttwenty;
+            customer.msgGoToDest(xTable2,yTable2);
+
+        }
+        else if (n==3){
+        	xDestination = xTable3 + shifttwenty;
+            yDestination = yTable3 - shifttwenty;
+            customer.msgGoToDest(xTable3,yTable3);
+
+        }
+        
+    	
         //needs to be changed based on what table they are going to, interacts with host agent
     }
 

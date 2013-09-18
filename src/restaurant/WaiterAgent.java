@@ -1,6 +1,7 @@
 package restaurant;
 
 import agent.Agent;
+import restaurant.CustomerAgent.AgentState;
 import restaurant.gui.HostGui;
 
 import java.util.*;
@@ -14,34 +15,22 @@ import java.util.concurrent.Semaphore;
 //the HostAgent. A Host is the manager of a restaurant who sees that all
 //is proceeded as he wishes.
 public class WaiterAgent extends Agent {
-	static final int NTABLES = 2;//a global for the number of tables.
-	//Notice that we implement waitingCustomers using ArrayList, but type it
-	//with List semantics.
 	
-	public String state="free";
-	
-	private HostAgent host;
-	
-	
+	public enum AgentState
+	{DoingNothing, SeatingCustomer};
+	private AgentState state = AgentState.DoingNothing;//The start state
 
-	private String name;
+	private HostAgent host;
 	private Semaphore atTable = new Semaphore(0,true);
+	String name;
+	//private Semaphore atTable = new Semaphore(0,true);
 
 	public HostGui hostGui = null;
 
-	public void setHost(HostAgent host) {
-		this.host = host;
-	}
-	
 	public WaiterAgent(String name) {
 		super();
-
+		
 		this.name = name;
-		// make some tables
-		//host.tables = new ArrayList<Table>(NTABLES);
-		//for (int ix = 1; ix <= NTABLES; ix++) {
-			//tables.add(new Table(ix));//how you add to a collections
-		//}
 	}
 
 	public String getMaitreDName() {
@@ -53,29 +42,25 @@ public class WaiterAgent extends Agent {
 	}
 
 	public List getWaitingCustomers() {
-		return host.waitingCustomers;
+		return host.getWaitingCustomers();
 	}
 
 	public Collection getTables() {
-		return host.tables;
+		return host.getTables();
 	}
 	// Messages
 
-	/*public void msgLeavingTable(CustomerAgent cust) {
-		for (Table table : host.tables) {
-			if (table.getOccupant() == cust) {
-				print(cust + " leaving " + table);
-				table.setUnoccupied();
-				stateChanged();
-			}
-		}
-	}*/
+	
 
-	/*public void msgAtTable() {//from animation
+	public void msgLeavingTable(CustomerAgent cust) {
+		host.msgLeavingTable(cust);
+	}
+
+	public void msgAtTable() {//from animation
 		//print("msgAtTable() called");
 		atTable.release();// = true;
 		stateChanged();
-	}*/
+	}
 
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
@@ -86,8 +71,17 @@ public class WaiterAgent extends Agent {
             so that table is unoccupied and customer is waiting.
             If so seat him at the table.
 		 */
-		if (state=="free"){
-			
+		for (Table table : tables) {
+			if (!table.isOccupied()) {
+				if (!waitingCustomers.isEmpty()) {
+					if (state == AgentState.DoingNothing){
+						state = AgentState.SeatingCustomer;
+						//stateChanged();
+						seatCustomer(waitingCustomers.get(0), table);//the action
+						return true;//return true to the abstract agent to reinvoke the scheduler.
+					}	
+				}
+			}
 		}
 
 		return false;
@@ -98,18 +92,18 @@ public class WaiterAgent extends Agent {
 
 	// Actions
 
-	public void msgSeatCustomer(CustomerAgent customer, int table) {
-		/*customer.msgSitAtTable();
-		//DoSeatCustomer(customer, table);
+	private void seatCustomer(CustomerAgent customer, Table table) {
+		customer.msgSitAtTable();
+		DoSeatCustomer(customer, table);
 		try {
 			atTable.acquire();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//table.setOccupant(customer);
-	//	waitingCustomers.remove(customer);
-	//	hostGui.DoLeaveCustomer();*/
+		table.setOccupant(customer);
+		waitingCustomers.remove(customer);
+		hostGui.DoLeaveCustomer();
 	}
 
 	// The animation DoXYZ() routines
@@ -117,8 +111,14 @@ public class WaiterAgent extends Agent {
 		//Notice how we print "customer" directly. It's toString method will do it.
 		//Same with "table"
 		print("Seating " + customer + " at " + table);
-		hostGui.DoBringToTable(customer); 
+		hostGui.DoBringToTable(customer, table.tableNumber); 
 
+	}
+	
+	public void msgAtFront(){
+		state = AgentState.DoingNothing;
+		//atTable.release();
+		stateChanged();
 	}
 
 	//utilities

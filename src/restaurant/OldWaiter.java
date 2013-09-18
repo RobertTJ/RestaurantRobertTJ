@@ -1,51 +1,46 @@
 package restaurant;
 
 import agent.Agent;
-import restaurant.CustomerAgent.AgentState;
 import restaurant.gui.HostGui;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
 
 /**
- * Restaurant Host Agent
+ * Restaurant Waiter Agent
  */
-//We only have 2 types of agents in this prototype. A customer and an agent that
-//does all the rest. Rather than calling the other agent a waiter, we called him
-//the HostAgent. A Host is the manager of a restaurant who sees that all
-//is proceeded as he wishes.
-public class HostAgent extends Agent {
-	static final int NTABLES = 3;//a global for the number of tables.
-	//Notice that we implement waitingCustomers using ArrayList, but type it
-	//with List semantics.
-	public List<CustomerAgent> waitingCustomers
-	= new ArrayList<CustomerAgent>();
-	public Collection<Table> tables;
-	//note that tables is typed with Collection semantics.
-	//Later we will see how it is implemented
+
+public class OldWaiter extends Agent {
 	
-	public enum AgentState
-	{DoingNothing, SeatingCustomer};
-	private AgentState state = AgentState.DoingNothing;//The start state
+	
+	public String state="free";
+	
+	private HostAgent host;
+	
+	
 
 	private String name;
 	private Semaphore atTable = new Semaphore(0,true);
 
 	public HostGui hostGui = null;
 
-	public HostAgent(String name) {
+	public void setHost(HostAgent host) {
+		this.host = host;
+	}
+	
+	public OldWaiter(String name) {
 		super();
 
 		this.name = name;
 		// make some tables
-		tables = new ArrayList<Table>(NTABLES);
-		for (int ix = 1; ix <= NTABLES; ix++) {
-			tables.add(new Table(ix));//how you add to a collections
-		}
+		//host.tables = new ArrayList<Table>(NTABLES);
+		//for (int ix = 1; ix <= NTABLES; ix++) {
+			//tables.add(new Table(ix));//how you add to a collections
+		//}
 	}
 
 	public String getMaitreDName() {
-		return name;
+		return host.getName();
 	}
 
 	public String getName() {
@@ -53,34 +48,29 @@ public class HostAgent extends Agent {
 	}
 
 	public List getWaitingCustomers() {
-		return waitingCustomers;
+		return host.waitingCustomers;
 	}
 
 	public Collection getTables() {
-		return tables;
+		return host.tables;
 	}
 	// Messages
 
-	public void msgIWantFood(CustomerAgent cust) {
-		waitingCustomers.add(cust);
-		stateChanged();
-	}
-
-	public void msgLeavingTable(CustomerAgent cust) {
-		for (Table table : tables) {
+	/*public void msgLeavingTable(CustomerAgent cust) {
+		for (Table table : host.tables) {
 			if (table.getOccupant() == cust) {
 				print(cust + " leaving " + table);
 				table.setUnoccupied();
 				stateChanged();
 			}
 		}
-	}
+	}*/
 
-	public void msgAtTable() {//from animation
+	/*public void msgAtTable() {//from animation
 		//print("msgAtTable() called");
 		atTable.release();// = true;
 		stateChanged();
-	}
+	}*/
 
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
@@ -91,17 +81,8 @@ public class HostAgent extends Agent {
             so that table is unoccupied and customer is waiting.
             If so seat him at the table.
 		 */
-		for (Table table : tables) {
-			if (!table.isOccupied()) {
-				if (!waitingCustomers.isEmpty()) {
-					if (state == AgentState.DoingNothing){
-						state = AgentState.SeatingCustomer;
-						//stateChanged();
-						seatCustomer(waitingCustomers.get(0), table);//the action
-						return true;//return true to the abstract agent to reinvoke the scheduler.
-					}	
-				}
-			}
+		if (state=="free"){
+			
 		}
 
 		return false;
@@ -112,18 +93,18 @@ public class HostAgent extends Agent {
 
 	// Actions
 
-	private void seatCustomer(CustomerAgent customer, Table table) {
-		customer.msgSitAtTable();
-		DoSeatCustomer(customer, table);
+	public void msgSeatCustomer(CustomerAgent customer, int table) {
+		/*customer.msgSitAtTable();
+		//DoSeatCustomer(customer, table);
 		try {
 			atTable.acquire();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		table.setOccupant(customer);
-		waitingCustomers.remove(customer);
-		hostGui.DoLeaveCustomer();
+		//table.setOccupant(customer);
+	//	waitingCustomers.remove(customer);
+	//	hostGui.DoLeaveCustomer();*/
 	}
 
 	// The animation DoXYZ() routines
@@ -131,14 +112,8 @@ public class HostAgent extends Agent {
 		//Notice how we print "customer" directly. It's toString method will do it.
 		//Same with "table"
 		print("Seating " + customer + " at " + table);
-		hostGui.DoBringToTable(customer, table.tableNumber); 
+		//hostGui.DoBringToTable(customer); 
 
-	}
-	
-	public void msgAtFront(){
-		state = AgentState.DoingNothing;
-		//atTable.release();
-		stateChanged();
 	}
 
 	//utilities

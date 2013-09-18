@@ -25,7 +25,7 @@ public class CustomerAgent extends Agent {
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	public enum AgentEvent 
-	{none, gotHungry, followWaiter, seated, doneEating, doneLeaving};
+	{none, gotHungry, followHost, seated, doneEating, doneLeaving};
 	AgentEvent event = AgentEvent.none;
 
 	/**
@@ -59,7 +59,7 @@ public class CustomerAgent extends Agent {
 
 	public void msgSitAtTable() {
 		print("Received msgSitAtTable");
-		event = AgentEvent.followWaiter;
+		event = AgentEvent.followHost;
 		stateChanged();
 	}
 
@@ -85,7 +85,7 @@ public class CustomerAgent extends Agent {
 			goToRestaurant();
 			return true;
 		}
-		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followWaiter ){
+		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followHost ){
 			state = AgentState.BeingSeated;
 			SitDown();
 			return true;
@@ -117,8 +117,9 @@ public class CustomerAgent extends Agent {
 	}
 
 	private void SitDown() {
+		
 		Do("Being seated. Going to table");
-		customerGui.DoGoToSeat(1);//hack; only one table
+		//customerGui.DoGoToSeat(1);//hack; only one table
 	}
 
 	private void EatFood() {
@@ -140,7 +141,7 @@ public class CustomerAgent extends Agent {
 				stateChanged();
 			}
 		},
-		5000);//getHungerLevel() * 1000);//how long to wait before running task
+		50000);//getHungerLevel() * 1000);//how long to wait before running task
 	}
 
 	private void leaveTable() {
@@ -175,6 +176,10 @@ public class CustomerAgent extends Agent {
 
 	public CustomerGui getGui() {
 		return customerGui;
+	}
+	
+	public void msgGoToDest(int x, int y){
+		customerGui.msgGoToXY(x, y);
 	}
 }
 
