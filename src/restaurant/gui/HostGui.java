@@ -21,7 +21,11 @@ public class HostGui implements Gui {
         this.agent = agent;
     }
 
-    
+
+   /* public HostGui(WaiterAgent agent) {
+        this.agent = agent;
+    }*/
+
     
     public void updatePosition() {
         if (xPos < xDestination)

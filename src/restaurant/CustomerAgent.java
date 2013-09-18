@@ -25,7 +25,7 @@ public class CustomerAgent extends Agent {
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	public enum AgentEvent 
-	{none, gotHungry, followHost, seated, doneEating, doneLeaving};
+	{none, gotHungry, followWaiter, seated, doneEating, doneLeaving};
 	AgentEvent event = AgentEvent.none;
 
 	/**
@@ -59,7 +59,7 @@ public class CustomerAgent extends Agent {
 
 	public void msgSitAtTable() {
 		print("Received msgSitAtTable");
-		event = AgentEvent.followHost;
+		event = AgentEvent.followWaiter;
 		stateChanged();
 	}
 
@@ -85,7 +85,7 @@ public class CustomerAgent extends Agent {
 			goToRestaurant();
 			return true;
 		}
-		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followHost ){
+		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followWaiter ){
 			state = AgentState.BeingSeated;
 			SitDown();
 			return true;
