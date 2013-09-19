@@ -7,9 +7,8 @@ import restaurant.WaiterAgent;
 
 import java.awt.*;
 
-public class HostGui implements Gui {
+public class WaiterGui implements Gui {
 
-    private HostAgent wagent = null;
     private WaiterAgent agent = null;
 
     private int xPos = -20, yPos = -20;//default waiter position
@@ -25,11 +24,7 @@ public class HostGui implements Gui {
     public static final int xTable3 = 640;
     public static final int yTable3 = 250;
 
-    public HostGui(HostAgent agent) {
-        this.wagent = agent;
-    }
-    
-    public HostGui(WaiterAgent agent) {
+    public WaiterGui(WaiterAgent agent) {
         this.agent = agent;
     }
 

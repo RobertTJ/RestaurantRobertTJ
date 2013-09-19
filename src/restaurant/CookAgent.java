@@ -2,6 +2,7 @@ package restaurant;
 
 import agent.Agent;
 import restaurant.gui.HostGui;
+import restaurant.HostAgent;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -16,6 +17,8 @@ import java.util.concurrent.Semaphore;
 public class CookAgent extends Agent {
 
 	private String name;
+	//List<Order> orders= new <ListArray>Order();
+	HostAgent host;
 	
 	//public HostGui hostGui = null;
 
@@ -37,25 +40,8 @@ public class CookAgent extends Agent {
 
 	// Messages
 
-	/*public void msgIWantFood(CustomerAgent cust) {
-		waitingCustomers.add(cust);
-		stateChanged();
-	}
-
-	public void msgLeavingTable(CustomerAgent cust) {
-		for (Table table : tables) {
-			if (table.getOccupant() == cust) {
-				print(cust + " leaving " + table);
-				table.setUnoccupied();
-				stateChanged();
-			}
-		}
-	}
-
-	public void msgAtTable() {//from animation
-		//print("msgAtTable() called");
-		atTable.release();// = true;
-		stateChanged();
+	/*public void NewOrder(string food, int table, WaiterAgent waiter) {
+		
 	}*/
 
 	/**
@@ -67,6 +53,14 @@ public class CookAgent extends Agent {
             so that table is unoccupied and customer is waiting.
             If so seat him at the table.
 		 */
+		
+		/*for (Order order : orders){
+			if(order.state=done&&order.waiter.state==free) callWaiter(o);
+		}*/
+		
+		/*for (Order order : orders){
+		if(order.state=pending) Cool(order);
+	    }*/
 	
 
 		return false;
@@ -76,6 +70,13 @@ public class CookAgent extends Agent {
 	}
 
 	// Actions
+	/*public void callWaiter(Order o) {
+		//tell waiter to deliver food.  msgFoodready(o.f); ? somewhat off
+	}*/
+	
+	/*public void Cook(Order o) {
+		//initialize map based on food, start timer based on cooktime
+	}*/
 
 	
 }

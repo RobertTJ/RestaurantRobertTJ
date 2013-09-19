@@ -18,6 +18,7 @@ public class CustomerAgent extends Agent {
 
 	// agent correspondents
 	private HostAgent host;
+	private WaiterAgent waiter;
 
 	//    private boolean isHungry = false; //hack for gui
 	public enum AgentState
@@ -45,6 +46,10 @@ public class CustomerAgent extends Agent {
 	public void setHost(HostAgent host) {
 		this.host = host;
 	}
+	
+	public void msgSetWaiter(WaiterAgent w) {
+		this.waiter=w;
+	}
 
 	public String getCustomerName() {
 		return name;
@@ -56,11 +61,15 @@ public class CustomerAgent extends Agent {
 		event = AgentEvent.gotHungry;
 		stateChanged();
 	}
-
+	
 	public void msgSitAtTable() {
 		print("Received msgSitAtTable");
 		event = AgentEvent.followHost;
 		stateChanged();
+	}
+	
+	public void msgGoToDest(int x, int y){
+		customerGui.msgGoToXY(x, y);
 	}
 
 	public void msgAnimationFinishedGoToSeat() {
@@ -73,6 +82,13 @@ public class CustomerAgent extends Agent {
 		event = AgentEvent.doneLeaving;
 		stateChanged();
 	}
+	/*public void msgHereForOrder() {
+		event = waiting for food
+	}*/
+	
+	/*public void msgDeliverFood(string food) {
+		//statechange to eating
+	}*/
 
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
@@ -146,7 +162,7 @@ public class CustomerAgent extends Agent {
 
 	private void leaveTable() {
 		Do("Leaving.");
-		host.msgLeavingTable(this);
+		waiter.msgLeavingTable(this);
 		customerGui.DoExitRestaurant();
 	}
 
@@ -178,8 +194,6 @@ public class CustomerAgent extends Agent {
 		return customerGui;
 	}
 	
-	public void msgGoToDest(int x, int y){
-		customerGui.msgGoToXY(x, y);
-	}
+	
 }
 

@@ -20,6 +20,8 @@ public class HostAgent extends Agent {
 	//with List semantics.
 	public List<CustomerAgent> waitingCustomers
 	= new ArrayList<CustomerAgent>();
+	public List<WaiterAgent> allWaiters
+	= new ArrayList<WaiterAgent>();
 	public Collection<Table> tables;
 	//note that tables is typed with Collection semantics.
 	//Later we will see how it is implemented
@@ -29,7 +31,7 @@ public class HostAgent extends Agent {
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	private String name;
-	private Semaphore atTable = new Semaphore(0,true);
+	private Semaphore atTable = new Semaphore(2,true);
 
 	public HostGui hostGui = null;
 
@@ -60,6 +62,10 @@ public class HostAgent extends Agent {
 		return tables;
 	}
 	// Messages
+	
+	public void msgImFree() {
+		stateChanged();
+	}
 
 	public void msgIWantFood(CustomerAgent cust) {
 		waitingCustomers.add(cust);
@@ -78,7 +84,7 @@ public class HostAgent extends Agent {
 
 	public void msgAtTable() {//from animation
 		//print("msgAtTable() called");
-		atTable.release();// = true;
+		//atTable.release();// = true;
 		stateChanged();
 	}
 
@@ -94,11 +100,13 @@ public class HostAgent extends Agent {
 		for (Table table : tables) {
 			if (!table.isOccupied()) {
 				if (!waitingCustomers.isEmpty()) {
-					if (state == AgentState.DoingNothing){
-						state = AgentState.SeatingCustomer;
-						//stateChanged();
-						seatCustomer(waitingCustomers.get(0), table);//the action
-						return true;//return true to the abstract agent to reinvoke the scheduler.
+					for (WaiterAgent waiter : allWaiters) {
+						if (!waiter.busy){
+							
+							 seatCustomer( waiter, waitingCustomers.get(0), table);
+
+							return true;//return true to the abstract agent to reinvoke the scheduler.
+						}
 					}	
 				}
 			}
@@ -112,34 +120,34 @@ public class HostAgent extends Agent {
 
 	// Actions
 
-	private void seatCustomer(CustomerAgent customer, Table table) {
-		customer.msgSitAtTable();
-		DoSeatCustomer(customer, table);
-		try {
+	private void seatCustomer(WaiterAgent waiter, CustomerAgent customer, Table table) {
+		waiter.msgNewCustomerToSeat(customer, table.tableNumber);		
+		print(waiter.getName() + " seating " + customer + " at " + table);
+		/*try {
 			atTable.acquire();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		table.setOccupant(customer);
 		waitingCustomers.remove(customer);
-		hostGui.DoLeaveCustomer();
+		//hostGui.DoLeaveCustomer();
 	}
 
 	// The animation DoXYZ() routines
-	private void DoSeatCustomer(CustomerAgent customer, Table table) {
+	/*private void DoSeatCustomer(CustomerAgent customer, Table table) {
 		//Notice how we print "customer" directly. It's toString method will do it.
 		//Same with "table"
 		print("Seating " + customer + " at " + table);
 		hostGui.DoBringToTable(customer, table.tableNumber); 
 
-	}
+	}*/
 	
-	public void msgAtFront(){
+	/*public void msgAtFront(){
 		state = AgentState.DoingNothing;
 		//atTable.release();
 		stateChanged();
-	}
+	}*/
 
 	//utilities
 
