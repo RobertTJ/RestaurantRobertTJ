@@ -49,11 +49,6 @@ public class RestaurantPanel extends JPanel {
     public RestaurantPanel(RestaurantGui gui) {
         this.gui = gui;
         
-       // gui.allAgents.add(host);
-       // gui.allAgents.add(waiter);
-      //  gui.allAgents.add(waiter2);
-      //  gui.allAgents.add(cook);
-        
         host.setGui(hostGui);
        
         waiter.setGui(waiterGui);
@@ -155,6 +150,28 @@ public class RestaurantPanel extends JPanel {
                  temp.getGui().setHungry();
     }
         
+    
+    public void pause() {
+    	host.Pause();
+    	cook.Pause();
+    	waiter.Pause();
+    	waiter2.Pause();
+    	
+    	for (CustomerAgent cust : customers) {
+    		cust.Pause();
+    	}
+    }
+    
+    public void resume() {
+    	host.Resume();
+    	cook.Resume();
+    	waiter.Resume();
+    	waiter2.Resume();
+    	
+    	for (CustomerAgent cust : customers) {
+    		cust.Resume();
+    	}
+    }
 
     /**
      * Adds a customer or waiter to the appropriate list
