@@ -23,11 +23,14 @@ public class ListPanel extends JPanel implements ActionListener {
     private JPanel view = new JPanel();
     private List<JButton> list = new ArrayList<JButton>();
     private JButton addPersonB = new JButton("Add");
+    private JButton Pause = new JButton("Pause");
+    private JButton Resume = new JButton("Resume");
 
     private RestaurantPanel restPanel;
     private String type;
     private JTextField newcustomer;
     private JPanel entryline;
+    private JPanel pauseline;
     List<JCheckBox> stateCB2 = new ArrayList<JCheckBox>();
     private int k=0;
     private int textwidth = 200;
@@ -54,6 +57,8 @@ public class ListPanel extends JPanel implements ActionListener {
 
         entryline = new JPanel();
         entryline.setLayout(new BoxLayout(entryline, BoxLayout.X_AXIS));
+        pauseline = new JPanel();
+        pauseline.setLayout(new BoxLayout(pauseline, BoxLayout.X_AXIS));
         
         newcustomer = new JTextField(one);
         newcustomer.setPreferredSize( new Dimension( textwidth,textheight ) );
@@ -63,12 +68,16 @@ public class ListPanel extends JPanel implements ActionListener {
 
         entryline.add(newcustomer);
         
-        
+        Pause.addActionListener(this);
+        Resume.addActionListener(this);
         addPersonB.addActionListener(this);
         entryline.add(addPersonB);
-        
+        entryline.add(Pause);
+        entryline.add(Resume);
+        Resume.setVisible(false);
        
         add(entryline);
+       // add(pauseline);
 
         view.setLayout(new GridLayout(rows,columns));
         pane.setViewportView(view);
@@ -84,7 +93,16 @@ public class ListPanel extends JPanel implements ActionListener {
         	// Chapter 2.19 describes showInputDialog()
             addPerson(newcustomer.getText());
         }
-        
+        else if (e.getSource() == Pause) {
+        	restPanel.pause();
+        	Pause.setVisible(false);
+        	Resume.setVisible(true);
+        }
+        else if (e.getSource() == Resume) {
+        	restPanel.resume();
+        	Pause.setVisible(true);
+        	Resume.setVisible(false);
+        }
         
        
         else {

@@ -9,8 +9,8 @@ import java.util.concurrent.*;
  */
 public abstract class Agent {
     Semaphore stateChange = new Semaphore(1, true);//binary semaphore, fair
-    Semaphore pause = new Semaphore(0);
-    Boolean pauses=false;
+    Semaphore pause = new Semaphore(0, true);
+    Boolean paused=false;
     private AgentThread agentThread;
 
     protected Agent() {
@@ -25,7 +25,12 @@ public abstract class Agent {
     }
 
     public void Pause() {
-    	pauses=true;
+    	paused=true;
+    }
+    
+    public void Resume() {
+    	paused=false;
+    	pause.release();
     }
     
     /**
@@ -115,6 +120,10 @@ public abstract class Agent {
 
             while (goOn) {
                 try {
+                	
+                	if (paused== true) {
+                		pause.acquire();
+                	}
                     // The agent sleeps here until someone calls, stateChanged(),
                     // which causes a call to stateChange.give(), which wakes up agent.
                     stateChange.acquire();

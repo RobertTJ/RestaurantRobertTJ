@@ -46,7 +46,7 @@ public class WaiterAgent extends Agent {
 	
 	private Semaphore atTable = new Semaphore(0,true);
 	private Semaphore atCook = new Semaphore(0,true);
-	private Semaphore working = new Semaphore(0,true);
+	//private Semaphore working = new Semaphore(0,true);
 	String name;
 
 	public WaiterGui waiterGui = null;
@@ -132,7 +132,7 @@ public class WaiterAgent extends Agent {
 		this.state = AgentState.DoingNothing;
 		busy=false;
 		host.msgImFree();
-		working.release();
+		//working.release();
 		stateChanged();
 
 	}
@@ -167,12 +167,13 @@ public class WaiterAgent extends Agent {
 		
 		//if (!busy)
 		
-		try {
+		/*try {
 			working.acquire();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
+		if (busy) return false;
 		
 		for (Event pendingEvents : allEvents) {
 			if (pendingEvents == Event.GotOrder) { //&& this.state == AgentState.GetOrder) {
@@ -182,6 +183,8 @@ public class WaiterAgent extends Agent {
 				break;
 			}
 		}
+		
+		
 		for (Event pendingEvents : allEvents) {
 			if (pendingEvents == Event.FoodReady && this.state == AgentState.DoingNothing && busy==false) {
 				busy=true;
@@ -231,15 +234,15 @@ public class WaiterAgent extends Agent {
 								break;
 								}
 						}
-						DeliverFoodToTable(CurrentCustomer);
 						allEvents.remove(currentEvent);
+						DeliverFoodToTable(CurrentCustomer);
 						return true;
 					}
 		
 					if (currentEvent==Event.customerReady) {
 						this.state = AgentState.GetOrder;
-						GetCustomerOrder();
 						allEvents.remove(currentEvent);
+						GetCustomerOrder();
 						return true;
 					}
 					
@@ -253,23 +256,23 @@ public class WaiterAgent extends Agent {
 								break;
 								}
 						}
-						TakeOrderToKitchen(CurrentCustomer);
 						allEvents.remove(currentEvent);
+						TakeOrderToKitchen(CurrentCustomer);
 						return true;
 					}
 		
 					if (currentEvent==Event.NewCustomerToSeat){
 						this.state = AgentState.SeatingCustomer;
 						//stateChanged();
-						seatCustomer();//the action
 						allEvents.remove(currentEvent);
+						seatCustomer();//the action
 						return true;//return true to the abstract agent to reinvoke the scheduler.
 					}	
 					if (currentEvent==Event.customerDone) {
 						//print ("Testing");
 						this.state=AgentState.CleanTable;
-						PrepareTable();
 						allEvents.remove(currentEvent);
+						PrepareTable();
 						return true;
 					}
 		
@@ -302,6 +305,8 @@ public class WaiterAgent extends Agent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		busy=true;
+		//this.state=AgentState.SeatingCustomer;
 		event=Event.DoneSeating;
 		waiterGui.DoLeaveCustomer();
 	}
@@ -333,6 +338,7 @@ public class WaiterAgent extends Agent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		busy=true;
 		this.state=AgentState.GetOrder;
 		print("hihihi  "+this.state);
 
@@ -352,6 +358,8 @@ public class WaiterAgent extends Agent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		busy=true;
+		this.state=AgentState.TakeOrderToCook;
 		current.setState(CustState.WaitingForFood);
 		cook.msgNewOrder(this,current.getTableNumber(), current.getOrder());
 		waiterGui.DoLeaveCustomer();
@@ -368,6 +376,8 @@ public class WaiterAgent extends Agent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		busy=true;
+		this.state=AgentState.ServeFood;
 		current.setState(CustState.Eating); 
 		current.getCustomer().msgDeliveredFood();
     	waiterGui.DoLeaveCustomer();
@@ -389,7 +399,9 @@ public class WaiterAgent extends Agent {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}		
+		}	
+		busy=true;
+		this.state=AgentState.CleanTable;
 		host.msgLeavingTable(CurrentCustomer.getCustomer());
 		CurrentCustomer.setState(CustState.Gone);
 		print("Table clean");
