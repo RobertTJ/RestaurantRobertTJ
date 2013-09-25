@@ -12,6 +12,7 @@ import java.util.TimerTask;
  */
 public class CustomerAgent extends Agent {
 	private String name;
+	private String order = "Salad";
 	private int hungerLevel = 5;        // determines length of meal
 	Timer timer = new Timer();
 	private CustomerGui customerGui;
@@ -22,11 +23,11 @@ public class CustomerAgent extends Agent {
 
 	//    private boolean isHungry = false; //hack for gui
 	public enum AgentState
-	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, Eating, DoneEating, Leaving};
+	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, Ordered, Eating, DoneEating, Leaving};
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	public enum AgentEvent 
-	{none, gotHungry, followHost, seated, doneEating, doneLeaving};
+	{none, gotHungry, followHost, seated, beingHelped, gotFood, doneEating, doneLeaving};
 	AgentEvent event = AgentEvent.none;
 
 	/**
@@ -82,13 +83,15 @@ public class CustomerAgent extends Agent {
 		event = AgentEvent.doneLeaving;
 		stateChanged();
 	}
-	/*public void msgHereForOrder() {
-		event = waiting for food
-	}*/
+	public void msgHereForOrder() {
+		event = AgentEvent.beingHelped;
+		stateChanged();
+	}
 	
-	/*public void msgDeliverFood(string food) {
-		//statechange to eating
-	}*/
+	public void msgDeliveredFood() {
+		event=AgentEvent.gotFood;
+		stateChanged();
+	}
 
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
@@ -107,11 +110,20 @@ public class CustomerAgent extends Agent {
 			return true;
 		}
 		if (state == AgentState.BeingSeated && event == AgentEvent.seated){
+			state = AgentState.Seated;
+			PeruseMenu();
+			return true;
+		}
+		if (state == AgentState.Seated && event == AgentEvent.beingHelped) {
+			state=AgentState.Ordered;
+			OrderFood();
+			return true;
+		}
+		if (state == AgentState.Ordered && event == AgentEvent.gotFood) {
 			state = AgentState.Eating;
 			EatFood();
 			return true;
 		}
-
 		if (state == AgentState.Eating && event == AgentEvent.doneEating){
 			state = AgentState.Leaving;
 			leaveTable();
@@ -136,6 +148,44 @@ public class CustomerAgent extends Agent {
 		
 		Do("Being seated. Going to table");
 		//customerGui.DoGoToSeat(1);//hack; only one table
+	}
+	
+	private void PeruseMenu() {
+	CustomerAgent temp = this;
+		timer.schedule(new TimerTask() {
+			Object cookies = 1;
+			public void run() {
+				//look at menu, call waiter when ready
+				CallWaiter();
+				//waiter.msgReadyToOrder(temp);
+				stateChanged();
+			}
+		},
+		10000);
+	}
+	
+	public void CallWaiter() {
+		waiter.msgReadyToOrder(this);
+		print("I am ready to order");
+	}
+	
+	private void OrderFood() {
+		double select = Math.random()*3;
+		
+		if (select == 0) {
+			order = "Pizza";
+		}
+		else if (select == 1) {
+			order = "Steak";
+		}
+		else if (select == 2) {
+			order = "Chicken";
+		}
+		else {
+			order = "Salad";
+		}
+		waiter.msgOrderFood(this, order);
+		stateChanged();
 	}
 
 	private void EatFood() {
@@ -170,6 +220,10 @@ public class CustomerAgent extends Agent {
 
 	public String getName() {
 		return name;
+	}
+	
+	public String getOrder() {
+		return order;
 	}
 	
 	public int getHungerLevel() {

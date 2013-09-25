@@ -101,7 +101,7 @@ public class HostAgent extends Agent {
 			if (!table.isOccupied()) {
 				if (!waitingCustomers.isEmpty()) {
 					for (WaiterAgent waiter : allWaiters) {
-						if (!waiter.busy){
+						if (waiter.busy == false){
 							
 							 seatCustomer( waiter, waitingCustomers.get(0), table);
 

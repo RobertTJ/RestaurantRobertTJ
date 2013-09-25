@@ -27,12 +27,7 @@ public class WaiterGui implements Gui {
     public WaiterGui(WaiterAgent agent) {
         this.agent = agent;
     }
-
-
-   /* public HostGui(WaiterAgent agent) {
-        this.agent = agent;
-    }*/
-
+    
     
     public void updatePosition() {
         if (xPos < xDestination)
@@ -61,6 +56,15 @@ public class WaiterGui implements Gui {
         		& (xDestination ==-shifttwenty) & (yDestination == - shifttwenty)) {
            agent.msgAtFront();
         }
+        else if (xPos == xDestination && yPos == yDestination
+        		& (xDestination ==900) & (yDestination == 150)) {
+           agent.msgAtCook();
+        }
+    }
+    
+    public void DoGoToCook() {
+    	xDestination=900;
+    	yDestination=150;
     }
 
     public void draw(Graphics2D g) {
@@ -91,6 +95,45 @@ public class WaiterGui implements Gui {
             customer.msgGoToDest(xTable3,yTable3);
 
         }
+    }
+    
+    public void DoGoToTable(CustomerAgent customer, int n) {
+        if (n==1){
+        	xDestination = xTable1 + shifttwenty;
+            yDestination = yTable1 - shifttwenty;
+            
+        }
+        else if (n==2){
+        	xDestination = xTable2 + shifttwenty;
+            yDestination = yTable2 - shifttwenty;
+
+        }
+        else if (n==3){
+        	xDestination = xTable3 + shifttwenty;
+            yDestination = yTable3 - shifttwenty;
+            
+        }
+    }
+        
+    public void BringFoodToCustomer(CustomerAgent customer, int tableN) {
+            if (tableN==1){
+            	xDestination = xTable1 + shifttwenty;
+                yDestination = yTable1 - shifttwenty;
+                //customer.msgDeliveredFood();
+
+            }
+            else if (tableN==2){
+            	xDestination = xTable2 + shifttwenty;
+                yDestination = yTable2 - shifttwenty;
+                //customer.msgDeliveredFood();
+
+            }
+            else if (tableN==3){
+            	xDestination = xTable3 + shifttwenty;
+                yDestination = yTable3 - shifttwenty;
+                //customer.msgDeliveredFood();
+
+            }
         
     	
         //needs to be changed based on what table they are going to, interacts with host agent
