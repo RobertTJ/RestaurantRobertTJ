@@ -9,6 +9,8 @@ import java.util.concurrent.*;
  */
 public abstract class Agent {
     Semaphore stateChange = new Semaphore(1, true);//binary semaphore, fair
+    Semaphore pause = new Semaphore(0);
+    Boolean pauses=false;
     private AgentThread agentThread;
 
     protected Agent() {
@@ -22,6 +24,10 @@ public abstract class Agent {
         stateChange.release();
     }
 
+    public void Pause() {
+    	pauses=true;
+    }
+    
     /**
      * Agents must implement this scheduler to perform any actions appropriate for the
      * current state.  Will be called whenever a state change has occurred,

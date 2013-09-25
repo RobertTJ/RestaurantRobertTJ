@@ -21,6 +21,7 @@ public class RestaurantPanel extends JPanel {
     private HostAgent host = new HostAgent("Sarah");
     private HostGui hostGui = new HostGui(host);
     
+    
     private WaiterAgent waiter = new WaiterAgent("Frank");
     private WaiterGui waiterGui = new WaiterGui(waiter);
     
@@ -37,6 +38,9 @@ public class RestaurantPanel extends JPanel {
 
     private RestaurantGui gui; //reference to main gui
     
+   
+    
+    
     private int Gridwidth=1;
     private int two=2;
     private int ten=10;
@@ -44,6 +48,12 @@ public class RestaurantPanel extends JPanel {
 
     public RestaurantPanel(RestaurantGui gui) {
         this.gui = gui;
+        
+       // gui.allAgents.add(host);
+       // gui.allAgents.add(waiter);
+      //  gui.allAgents.add(waiter2);
+      //  gui.allAgents.add(cook);
+        
         host.setGui(hostGui);
        
         waiter.setGui(waiterGui);
@@ -159,6 +169,7 @@ public class RestaurantPanel extends JPanel {
     		CustomerGui g = new CustomerGui(c, gui);
 
     		gui.animationPanel.addGui(g);// dw
+    		//gui.allAgents.add(c);
     		c.setHost(host);
     		c.setGui(g);
     		c.msgSetWaiter(waiter);

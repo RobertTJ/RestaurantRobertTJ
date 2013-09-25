@@ -1,10 +1,14 @@
 package restaurant.gui;
 
 import restaurant.CustomerAgent;
+import agent.Agent;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 /**
  * Main GUI class.
  * Contains the main frame and subsequent panels
@@ -22,6 +26,8 @@ public class RestaurantGui extends JFrame implements ActionListener {
      * 2) the infoPanel about the clicked Customer (created just below)
      */    
     private RestaurantPanel restPanel = new RestaurantPanel(this);
+    public List<Agent> allAgents = new ArrayList<Agent>();
+    
     
     /* infoPanel holds information about the clicked customer, if there is one*/
     private JPanel infoPanel;
