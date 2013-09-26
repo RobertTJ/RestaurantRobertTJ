@@ -53,7 +53,7 @@ public class WaiterGui implements Gui {
            agent.msgAtTable();
         }
         else if (xPos == xDestination && yPos == yDestination
-        		& (xDestination ==-shifttwenty) & (yDestination == - shifttwenty)) {
+        		&& (xDestination ==-shifttwenty) && (yDestination == - shifttwenty)) {
            agent.msgAtFront();
         }
         else if (xPos == xDestination && yPos == yDestination

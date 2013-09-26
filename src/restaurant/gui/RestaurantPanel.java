@@ -25,8 +25,8 @@ public class RestaurantPanel extends JPanel {
     private WaiterAgent waiter = new WaiterAgent("Frank");
     private WaiterGui waiterGui = new WaiterGui(waiter);
     
-    private WaiterAgent waiter2 = new WaiterAgent("Fred");
-    private WaiterGui waiterGui2 = new WaiterGui(waiter);
+   // private WaiterAgent waiter2 = new WaiterAgent("Fred");
+   // private WaiterGui waiterGui2 = new WaiterGui(waiter);
     
     private CookAgent cook = new CookAgent("Tim");
 
@@ -52,22 +52,22 @@ public class RestaurantPanel extends JPanel {
         host.setGui(hostGui);
        
         waiter.setGui(waiterGui);
-        waiter2.setGui(waiterGui2);
+        //waiter2.setGui(waiterGui2);
         host.allWaiters.add(waiter);
-        host.allWaiters.add(waiter2);
+       // host.allWaiters.add(waiter2);
 
         waiter.SetHost(host);
-        waiter2.SetHost(host);
+       // waiter2.SetHost(host);
         
         waiter.setCook(cook);
-        waiter2.setCook(cook);
+       // waiter2.setCook(cook);
 
 
         
         gui.animationPanel.addGui(waiterGui);
         waiter.startThread();
-        gui.animationPanel.addGui(waiterGui2);
-        waiter2.startThread();
+      // gui.animationPanel.addGui(waiterGui2);
+        //waiter2.startThread();
        
         cook.startThread();
         
@@ -155,7 +155,7 @@ public class RestaurantPanel extends JPanel {
     	host.Pause();
     	cook.Pause();
     	waiter.Pause();
-    	waiter2.Pause();
+    	//waiter2.Pause();
     	
     	for (CustomerAgent cust : customers) {
     		cust.Pause();
@@ -166,7 +166,7 @@ public class RestaurantPanel extends JPanel {
     	host.Resume();
     	cook.Resume();
     	waiter.Resume();
-    	waiter2.Resume();
+    	//waiter2.Resume();
     	
     	for (CustomerAgent cust : customers) {
     		cust.Resume();
@@ -189,7 +189,18 @@ public class RestaurantPanel extends JPanel {
     		//gui.allAgents.add(c);
     		c.setHost(host);
     		c.setGui(g);
-    		c.msgSetWaiter(waiter);
+    		/*
+    		 ALERT ALERT ALERT ALERT
+    	 	 
+    	 	 ALERT ALERT ALERT ALERT
+
+    		 ALERT ALERT ALERT ALERT
+
+    		 ALERT ALERT ALERT ALERT
+
+
+    		 */
+    		c.msgSetWaiter(waiter);//PROBLEM FIX FOR MULT WAITERS
     		customers.add(c);
     		c.startThread();
     	}

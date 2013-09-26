@@ -30,7 +30,6 @@ public class ListPanel extends JPanel implements ActionListener {
     private String type;
     private JTextField newcustomer;
     private JPanel entryline;
-    private JPanel pauseline;
     List<JCheckBox> stateCB2 = new ArrayList<JCheckBox>();
     private int k=0;
     private int textwidth = 200;
@@ -57,8 +56,6 @@ public class ListPanel extends JPanel implements ActionListener {
 
         entryline = new JPanel();
         entryline.setLayout(new BoxLayout(entryline, BoxLayout.X_AXIS));
-        pauseline = new JPanel();
-        pauseline.setLayout(new BoxLayout(pauseline, BoxLayout.X_AXIS));
         
         newcustomer = new JTextField(one);
         newcustomer.setPreferredSize( new Dimension( textwidth,textheight ) );
@@ -77,8 +74,7 @@ public class ListPanel extends JPanel implements ActionListener {
         Resume.setVisible(false);
        
         add(entryline);
-       // add(pauseline);
-
+        
         view.setLayout(new GridLayout(rows,columns));
         pane.setViewportView(view);
         add(pane);

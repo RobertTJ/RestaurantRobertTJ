@@ -71,6 +71,7 @@ public class CustomerAgent extends Agent {
 	
 	public void msgGoToDest(int x, int y){
 		customerGui.msgGoToXY(x, y);
+		stateChanged();
 	}
 
 	public void msgAnimationFinishedGoToSeat() {
@@ -115,6 +116,7 @@ public class CustomerAgent extends Agent {
 			return true;
 		}
 		if (state == AgentState.Seated && event == AgentEvent.beingHelped) {
+			//print("In customer?");
 			state=AgentState.Ordered;
 			OrderFood();
 			return true;
@@ -170,6 +172,7 @@ public class CustomerAgent extends Agent {
 	}
 	
 	private void OrderFood() {
+		
 		double select = Math.random()*3;
 		
 		if (select == 0) {
@@ -185,6 +188,7 @@ public class CustomerAgent extends Agent {
 			order = "Salad";
 		}
 		waiter.msgOrderFood(this, order);
+		//print("in cust execution?");
 		stateChanged();
 	}
 
