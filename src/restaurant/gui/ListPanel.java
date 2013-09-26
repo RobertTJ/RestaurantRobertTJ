@@ -93,11 +93,13 @@ public class ListPanel extends JPanel implements ActionListener {
         	restPanel.pause();
         	Pause.setVisible(false);
         	Resume.setVisible(true);
+        	Resume.setEnabled(true);
         }
         else if (e.getSource() == Resume) {
         	restPanel.resume();
         	Pause.setVisible(true);
         	Resume.setVisible(false);
+        	Pause.setEnabled(true);
         }
         
        

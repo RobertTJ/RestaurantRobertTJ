@@ -130,12 +130,12 @@ public class WaiterAgent extends Agent {
 	 }
 	
 	public void msgAtFront(){
-		try {
+		/*try {
 			working.acquire();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		this.state = AgentState.DoingNothing;
 		//print("Do I ever get here?");
 		busy=false;
@@ -183,7 +183,7 @@ public class WaiterAgent extends Agent {
 			e.printStackTrace();
 		}*/
 		if (busy) return false;
-		if (this.state==AgentState.DoingNothing) working.release();
+		//if (this.state==AgentState.DoingNothing) working.release();
 		
 		for (Event pendingEvents : allEvents) {
 			if (pendingEvents == Event.GotOrder && this.state == AgentState.GetOrder) {
