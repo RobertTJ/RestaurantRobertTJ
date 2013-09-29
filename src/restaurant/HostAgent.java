@@ -22,6 +22,7 @@ public class HostAgent extends Agent {
 	= new ArrayList<CustomerAgent>();
 	public List<WaiterAgent> allWaiters
 	= new ArrayList<WaiterAgent>();
+	//public Vector<Integer> customersServed = new Vector<Integer>(10);
 	public Collection<Table> tables;
 	//note that tables is typed with Collection semantics.
 	//Later we will see how it is implemented
@@ -34,6 +35,8 @@ public class HostAgent extends Agent {
 	private Semaphore atTable = new Semaphore(2,true);
 
 	public HostGui hostGui = null;
+	
+	private int LeastBusyWaiter=0;
 
 	public HostAgent(String name) {
 		super();
@@ -63,7 +66,7 @@ public class HostAgent extends Agent {
 	}
 	// Messages
 	
-	public void msgImFree() {
+	public void msgImFree(WaiterAgent w) {
 		stateChanged();
 	}
 
@@ -82,11 +85,6 @@ public class HostAgent extends Agent {
 		}
 	}
 
-	public void msgAtTable() {//from animation
-		//print("msgAtTable() called");
-		//atTable.release();// = true;
-		stateChanged();
-	}
 
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
@@ -100,14 +98,18 @@ public class HostAgent extends Agent {
 		for (Table table : tables) {
 			if (!table.isOccupied()) {
 				if (!waitingCustomers.isEmpty()) {
-					for (WaiterAgent waiter : allWaiters) {
-						if (waiter.busy == false){
-							
-							 seatCustomer( waiter, waitingCustomers.get(0), table);
+					
+					seatCustomer( allWaiters.get(LeastBusyWaiter), waitingCustomers.get(0), table);
+					
+					LeastBusyWaiter++;
+					
+					if(LeastBusyWaiter >= allWaiters.size()) {
+						LeastBusyWaiter=0;
+					}
+					// increments around the wiater list, assigned each subsequent customer to 
+					//the next waiter in allWaiters and loops back around to the first at the end
 
-							return true;//return true to the abstract agent to reinvoke the scheduler.
-						}
-					}	
+					return true;//return true to the abstract agent to reinvoke the scheduler.	
 				}
 			}
 		}

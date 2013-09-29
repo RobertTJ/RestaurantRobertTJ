@@ -22,14 +22,18 @@ public class ListPanel extends JPanel implements ActionListener {
                     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     private JPanel view = new JPanel();
     private List<JButton> list = new ArrayList<JButton>();
-    private JButton addPersonB = new JButton("Add");
+    private JButton addPersonB = new JButton("Add Customer");
+    private JButton addWaiterB = new JButton("Add Waiter");
     private JButton Pause = new JButton("Pause");
     private JButton Resume = new JButton("Resume");
+    
+    private JCheckBox initHungry = new JCheckBox("Hungry?");
 
     private RestaurantPanel restPanel;
     private String type;
     private JTextField newcustomer;
     private JPanel entryline;
+    private JPanel buttonline;
     List<JCheckBox> stateCB2 = new ArrayList<JCheckBox>();
     private int k=0;
     private int textwidth = 200;
@@ -52,28 +56,37 @@ public class ListPanel extends JPanel implements ActionListener {
         this.type = type;
 
         setLayout(new BoxLayout((Container) this, BoxLayout.Y_AXIS));
-        add(new JLabel("<html><pre> <u>" + type + "</u><br></pre></html>"));
+        //add(new JLabel("<html><pre> <u> Enter a name and click "Add Customer </u><br></pre></html>"));
 
         entryline = new JPanel();
         entryline.setLayout(new BoxLayout(entryline, BoxLayout.X_AXIS));
+        
+        buttonline = new JPanel();
+        buttonline.setLayout(new BoxLayout(buttonline, BoxLayout.X_AXIS));
         
         newcustomer = new JTextField(one);
         newcustomer.setPreferredSize( new Dimension( textwidth,textheight ) );
         newcustomer.setMinimumSize( new Dimension( textwidth, textheight ) );
         newcustomer.setMaximumSize( new Dimension( textwidth, textheight ) );
-
+              
+        addWaiterB.addActionListener(this);
 
         entryline.add(newcustomer);
         
         Pause.addActionListener(this);
         Resume.addActionListener(this);
         addPersonB.addActionListener(this);
-        entryline.add(addPersonB);
-        entryline.add(Pause);
-        entryline.add(Resume);
+        buttonline.add(initHungry);
+        buttonline.add(addPersonB);
+        buttonline.add(addWaiterB);
+        buttonline.add(Pause);
+        buttonline.add(Resume);
         Resume.setVisible(false);
        
         add(entryline);
+        add(buttonline);
+        add(new JLabel("<html><pre> <u>" + type + "</u><br></pre></html>"));
+
         
         view.setLayout(new GridLayout(rows,columns));
         pane.setViewportView(view);
@@ -88,6 +101,10 @@ public class ListPanel extends JPanel implements ActionListener {
         if (e.getSource() == addPersonB) {
         	// Chapter 2.19 describes showInputDialog()
             addPerson(newcustomer.getText());
+            
+        }
+        else if (e.getSource() == addWaiterB) {
+        	addWaiter(newcustomer.getText());
         }
         else if (e.getSource() == Pause) {
         	restPanel.pause();
@@ -167,8 +184,23 @@ public class ListPanel extends JPanel implements ActionListener {
             view.add(checkit);
             
             restPanel.addPerson(type, name);//puts customer on list
+            
            // restPanel.showInfo(type, name);//puts hungry button on panel
 
+            
+            validate();
+            if(initHungry.isSelected()) {
+            	restPanel.actionTime((stateCB2.size()-one));
+            	stateCB2.get((stateCB2.size()-one)).setSelected(true);
+            	stateCB2.get((stateCB2.size()-one)).setEnabled(false);
+            }
+        }
+    }
+    
+    public void addWaiter(String name) {
+        if (name != null) {
+
+            restPanel.addPerson("Waiters", name);//puts waiter on list
             
             validate();
         }

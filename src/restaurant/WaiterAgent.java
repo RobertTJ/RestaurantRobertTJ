@@ -139,7 +139,7 @@ public class WaiterAgent extends Agent {
 		this.state = AgentState.DoingNothing;
 		//print("Do I ever get here?");
 		busy=false;
-		host.msgImFree();
+		host.msgImFree(this);
 		//working.release();
 		stateChanged();
 
@@ -168,22 +168,9 @@ public class WaiterAgent extends Agent {
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
 	protected boolean pickAndExecuteAnAction() {
-		/* Think of this next rule as:
-            Does there exist a table and customer,
-            so that table is unoccupied and customer is waiting.
-            If so seat him at the table.
-		 */
 		
-		//if (!busy)
 		
-		/*try {
-			working.acquire();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		if (busy) return false;
-		//if (this.state==AgentState.DoingNothing) working.release();
+		//if (currentEvent)
 		
 		for (Event pendingEvents : allEvents) {
 			if (pendingEvents == Event.GotOrder && this.state == AgentState.GetOrder) {
@@ -195,18 +182,11 @@ public class WaiterAgent extends Agent {
 			}
 		}
 		
+		//if (busy == true && currentEvent != Event.GotOrder) return false;
+		
 		
 		for (Event pendingEvents : allEvents) {
-			if (pendingEvents == Event.FoodReady && busy == false) {
-				busy=true;
-				currentEvent = pendingEvents;
-				//allEvents.remove(pendingEvents);
-				break;
-			}
-		}
-		for (Event pendingEvents : allEvents) {
-			if (pendingEvents == Event.customerDone && busy == false) {
-				//print("trying");
+			if (pendingEvents == Event.FoodReady && this.state==AgentState.DoingNothing && busy == false) {
 				busy=true;
 				currentEvent = pendingEvents;
 				//allEvents.remove(pendingEvents);
@@ -230,6 +210,16 @@ public class WaiterAgent extends Agent {
 				break;
 			}
 		}
+		for (Event pendingEvents : allEvents) {
+			if (pendingEvents == Event.customerDone && busy == false) {
+				//print("trying");
+				busy=true;
+				currentEvent = pendingEvents;
+				//allEvents.remove(pendingEvents);
+				break;
+			}
+		}
+		
 		
 		if (!busy) {
 			return false;
@@ -248,6 +238,7 @@ public class WaiterAgent extends Agent {
 						}
 						allEvents.remove(currentEvent);
 						DeliverFoodToTable(CurrentCustomer);
+						currentEvent=null;
 						return true;
 					}
 		
@@ -255,6 +246,7 @@ public class WaiterAgent extends Agent {
 						this.state = AgentState.GetOrder;
 						allEvents.remove(currentEvent);
 						GetCustomerOrder();
+						currentEvent=null;
 						return true;
 					}
 					
@@ -272,6 +264,7 @@ public class WaiterAgent extends Agent {
 						}
 						allEvents.remove(currentEvent);
 						TakeOrderToKitchen(CurrentCustomer);
+						currentEvent=null;
 						return true;
 					}
 		
@@ -280,6 +273,7 @@ public class WaiterAgent extends Agent {
 						//stateChanged();
 						allEvents.remove(currentEvent);
 						seatCustomer();//the action
+						currentEvent=null;
 						return true;//return true to the abstract agent to reinvoke the scheduler.
 					}	
 					if (currentEvent==Event.customerDone) {
@@ -287,6 +281,7 @@ public class WaiterAgent extends Agent {
 						this.state=AgentState.CleanTable;
 						allEvents.remove(currentEvent);
 						PrepareTable();
+						currentEvent=null;
 						return true;
 					}
 		
@@ -308,7 +303,7 @@ public class WaiterAgent extends Agent {
 			}
 		}
 		
-		CurrentCustomer.getCustomer().msgSitAtTable();
+		CurrentCustomer.getCustomer().msgSitAtTable(this);
 		DoSeatCustomer(CurrentCustomer.getCustomer(), CurrentCustomer.getTableNumber());
 		try {
 			atTable.acquire();
@@ -349,7 +344,7 @@ public class WaiterAgent extends Agent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		busy=false;
+		busy=true;
 		this.state=AgentState.GetOrder;
 		//print("hihihi  "+this.state);
 
@@ -362,7 +357,7 @@ public class WaiterAgent extends Agent {
 	
 	public void TakeOrderToKitchen(Customers current) {
 		print("Taking order to chef");
-		waiterGui.DoGoToCook();
+		waiterGui.BringOrderToCook(current.getOrder());
 		try {
 			atCook.acquire();
 		} catch (InterruptedException e) {
@@ -386,8 +381,8 @@ public class WaiterAgent extends Agent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	waiterGui.DoGoToTable(current.getCustomer(), current.getTableNumber());
-    	print("Order Ready " + atTable);
+    	waiterGui.BringFoodToCustomer(current.getCustomer(), current.getTableNumber(),current.getOrder());
+    	//print("Order Ready " + atTable);
 
     	try {
 			atTable.acquire();

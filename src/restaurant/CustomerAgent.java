@@ -4,6 +4,7 @@ import restaurant.gui.CustomerGui;
 import restaurant.gui.RestaurantGui;
 import agent.Agent;
 
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -48,7 +49,7 @@ public class CustomerAgent extends Agent {
 		this.host = host;
 	}
 	
-	public void msgSetWaiter(WaiterAgent w) {
+	public void SetWaiter(WaiterAgent w) {
 		this.waiter=w;
 	}
 
@@ -63,7 +64,8 @@ public class CustomerAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void msgSitAtTable() {
+	public void msgSitAtTable(WaiterAgent w) {
+		this.waiter=w;
 		print("Received msgSitAtTable");
 		event = AgentEvent.followHost;
 		stateChanged();
@@ -159,7 +161,6 @@ public class CustomerAgent extends Agent {
 			public void run() {
 				//look at menu, call waiter when ready
 				CallWaiter();
-				//waiter.msgReadyToOrder(temp);
 				stateChanged();
 			}
 		},
@@ -173,7 +174,10 @@ public class CustomerAgent extends Agent {
 	
 	private void OrderFood() {
 		
-		double select = Math.random()*3;
+		Random generator = new Random();
+		int select = generator.nextInt(4);
+				
+		print("Randomed " + select);
 		
 		if (select == 0) {
 			order = "Pizza";
@@ -182,10 +186,10 @@ public class CustomerAgent extends Agent {
 			order = "Steak";
 		}
 		else if (select == 2) {
-			order = "Chicken";
+			order = "Salad";
 		}
 		else {
-			order = "Salad";
+			order = "Chicken";
 		}
 		waiter.msgOrderFood(this, order);
 		//print("in cust execution?");
@@ -194,6 +198,7 @@ public class CustomerAgent extends Agent {
 
 	private void EatFood() {
 		Do("Eating Food");
+		customerGui.EatTime(order);
 		//This next complicated line creates and starts a timer thread.
 		//We schedule a deadline of getHungerLevel()*1000 milliseconds.
 		//When that time elapses, it will call back to the run routine

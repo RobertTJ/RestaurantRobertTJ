@@ -98,49 +98,62 @@ public class CookAgent extends Agent {
 
 	// Actions
 	public void callWaiter(Order o) {
-		o.getWaiter().msgOrderReady(o.getOrder(), o.getTableNumber());
+		o.getWaiter().msgOrderReady(o.order.choice, o.getTableNumber());
 	}
 	
-	public void Cook(final Order o) {
-		int cooktime;
-		if (o.order == "Steak") {
-			cooktime=10000;
-		}
-		else if (o.order == "Chicken") {
-			cooktime=8000;
-		}
-		else if (o.order == "Salad") {
-			cooktime=1000;
-		}
-		else {
-			cooktime=5000;
-		}
-		
+	public void Cook(final Order o) {		
+		print("Stated cooking " + o.order.choice);
 		timer.schedule(new TimerTask() {
 			Object cook = 1;
 			public void run() {
 				//look at menu, call waiter when ready
 				o.setStateDone();
+				print("Finished cooking " + o.order.choice);
 				//waiter.msgReadyToOrder(temp);
 				stateChanged();
 			}
 		},
-		cooktime);
+		o.order.cooktime);
 	}
 
+	
+	private class Food {
+		String choice;
+		int cooktime;
+		
+		Food(String c) {
+			choice=c;
+			
+			if (c == "Steak") {
+				cooktime=10000;
+			}
+			else if (c == "Chicken") {
+				cooktime=8000;
+			}
+			else if (c == "Salad") {
+				cooktime=1000;
+			}
+			else {
+				cooktime=5000;
+			}
+		}
+	}
+	
 	private class Order {
 		WaiterAgent waiter;
-		String order;
+		//String choice;
 		int table;
 		CustomerAgent customer;
 		CookState state;
+		Food order;
 		
 		
 		
 		Order(WaiterAgent Waiter, int tableNumber, String o) {
 			this.table = tableNumber;
 			this.waiter = Waiter;
-			this.order=o;
+			this.order=new Food(o);;
+			
 			state=CookState.pending;
 		}
 		
@@ -169,10 +182,10 @@ public class CookAgent extends Agent {
 		}
 		
 		void setOrder (String o) {
-			order = o;
+			order.choice = o;
 		}
 		
-		String getOrder () {
+		Food getOrder () {
 			return order;
 		}
 

@@ -2,11 +2,13 @@ package restaurant.gui;
 
 import restaurant.CustomerAgent;
 import restaurant.HostAgent;
+//import restaurant.gui.WaiterGui.orderState;
 
 import java.awt.*;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+
 import java.awt.image.BufferedImage;
 
 public class CustomerGui implements Gui{
@@ -27,6 +29,10 @@ public class CustomerGui implements Gui{
 	private JLabel picture;
     private ImageIcon pic;
     private BufferedImage image;
+    private enum FoodState {noFood, EatingFood};
+    private String order;
+    
+    FoodState Food = FoodState.noFood;
 
     
 
@@ -69,6 +75,11 @@ public class CustomerGui implements Gui{
 	public void draw(Graphics2D g) {
 		g.setColor(Color.GREEN);
 		g.fillRect(xPos, yPos, shifttwenty, shifttwenty);
+		g.setColor(Color.BLACK);
+		 if (Food == FoodState.EatingFood) {
+	        	g.drawString(order, xPos, yPos-offscreenfourty);
+	        }
+		
 	//	image=ImageIO.read(new File("image/customerstickfigure.jpg"));
 		//pic = new ImageIcon("image/customerstickfigure.jpg");
 	    //picture = new JLabel(pic);
@@ -96,6 +107,22 @@ public class CustomerGui implements Gui{
 		
 	}
 	
+	public void EatTime(String choice) {
+		if (choice=="Steak") {
+    		order="ST";
+    	}
+    	else if (choice=="Chicken") {
+    		order="CK";
+    	}
+    	else if (choice=="Pizza") {
+    		order="PZ";
+    	}
+    	else {
+    		order="SD";
+    	}
+		Food=FoodState.EatingFood;
+	}
+	
 	public void msgGoToXY(int x, int y){
 		xDestination = x;
 		yDestination = y;
@@ -103,6 +130,7 @@ public class CustomerGui implements Gui{
 	}
 
 	public void DoExitRestaurant() {
+		Food=FoodState.noFood;
 		xDestination = offscreenfourty;
 		yDestination = offscreenfourty;
 		command = Command.LeaveRestaurant;

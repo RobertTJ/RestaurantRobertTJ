@@ -22,8 +22,8 @@ public class RestaurantPanel extends JPanel {
     private HostGui hostGui = new HostGui(host);
     
     
-    private WaiterAgent waiter = new WaiterAgent("Frank");
-    private WaiterGui waiterGui = new WaiterGui(waiter);
+   // private WaiterAgent waiter = new WaiterAgent("Frank");
+    //private WaiterGui waiterGui = new WaiterGui(waiter);
     
    // private WaiterAgent waiter2 = new WaiterAgent("Fred");
    // private WaiterGui waiterGui2 = new WaiterGui(waiter);
@@ -31,9 +31,11 @@ public class RestaurantPanel extends JPanel {
     private CookAgent cook = new CookAgent("Tim");
 
     private Vector<CustomerAgent> customers = new Vector<CustomerAgent>();
+    private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
 
     private JPanel restLabel = new JPanel();
     private ListPanel customerPanel = new ListPanel(this, "Customers");
+    
     private JPanel group = new JPanel();
 
     private RestaurantGui gui; //reference to main gui
@@ -51,21 +53,21 @@ public class RestaurantPanel extends JPanel {
         
         host.setGui(hostGui);
        
-        waiter.setGui(waiterGui);
+      // waiter.setGui(waiterGui);
         //waiter2.setGui(waiterGui2);
-        host.allWaiters.add(waiter);
+       // host.allWaiters.add(waiter);
        // host.allWaiters.add(waiter2);
 
-        waiter.SetHost(host);
+      //  waiter.SetHost (host);
        // waiter2.SetHost(host);
         
-        waiter.setCook(cook);
+       // waiter.setCook(cook);
        // waiter2.setCook(cook);
 
 
         
-        gui.animationPanel.addGui(waiterGui);
-        waiter.startThread();
+        //gui.animationPanel.addGui(waiterGui);
+       // waiter.startThread();
       // gui.animationPanel.addGui(waiterGui2);
         //waiter2.startThread();
        
@@ -154,8 +156,9 @@ public class RestaurantPanel extends JPanel {
     public void pause() {
     	host.Pause();
     	cook.Pause();
-    	waiter.Pause();
-    	//waiter2.Pause();
+    	for (WaiterAgent w : waiters) {
+    		w.Pause();
+    	}
     	
     	for (CustomerAgent cust : customers) {
     		cust.Pause();
@@ -165,8 +168,9 @@ public class RestaurantPanel extends JPanel {
     public void resume() {
     	host.Resume();
     	cook.Resume();
-    	waiter.Resume();
-    	//waiter2.Resume();
+    	for (WaiterAgent w : waiters) {
+    		w.Resume();
+    	}
     	
     	for (CustomerAgent cust : customers) {
     		cust.Resume();
@@ -200,9 +204,27 @@ public class RestaurantPanel extends JPanel {
 
 
     		 */
-    		c.msgSetWaiter(waiter);//PROBLEM FIX FOR MULT WAITERS
+    		//c.msgSetWaiter(waiter);//PROBLEM FIX FOR MULT WAITERS
     		customers.add(c);
     		c.startThread();
+    	}
+    	
+    	else {
+    		WaiterAgent w = new WaiterAgent(name);
+    		WaiterGui wg = new WaiterGui(w);
+    		
+    		w.setGui(wg);
+    	    host.allWaiters.add(w);
+    	    //host.customersServed.add(0);
+
+    	    w.SetHost (host);
+    	        
+    	    w.setCook(cook);
+    	        
+    	    gui.animationPanel.addGui(wg);
+    	    waiters.add(w);
+    	    w.startThread();
+    		
     	}
     }
 

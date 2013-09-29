@@ -10,6 +10,10 @@ import java.awt.*;
 public class WaiterGui implements Gui {
 
     private WaiterAgent agent = null;
+    private String order;
+    private enum orderState {noOrder, takingOrderToCook, TakingFoodToCustomer};
+    
+    orderState OrderState = orderState.noOrder;
 
     private int xPos = -20, yPos = -20;//default waiter position
     private int xDestination = -20, yDestination = -20;//default start position
@@ -63,6 +67,15 @@ public class WaiterGui implements Gui {
     }
     
     public void DoGoToCook() {
+    	//order=choice;
+    	//OrderState=orderState.takingOrderToCook;
+    	xDestination=900;
+    	yDestination=150;
+    }
+    
+    public void BringOrderToCook(String choice) {
+    	order=choice;
+    	OrderState=orderState.takingOrderToCook;
     	xDestination=900;
     	yDestination=150;
     }
@@ -70,6 +83,10 @@ public class WaiterGui implements Gui {
     public void draw(Graphics2D g) {
         g.setColor(Color.MAGENTA);
         g.fillRect(xPos, yPos, shifttwenty, shifttwenty);
+		g.setColor(Color.BLACK);
+        if (OrderState == orderState.TakingFoodToCustomer) {
+        	g.drawString(order, xPos, yPos);
+        }
     }
 
     public boolean isPresent() {
@@ -115,7 +132,21 @@ public class WaiterGui implements Gui {
         }
     }
         
-    public void BringFoodToCustomer(CustomerAgent customer, int tableN) {
+    public void BringFoodToCustomer(CustomerAgent customer, int tableN, String choice) {
+    	if (choice=="Steak") {
+    		order="ST?";
+    	}
+    	else if (choice=="Chicken") {
+    		order="CK?";
+    	}
+    	else if (choice=="Pizza") {
+    		order="PZ?";
+    	}
+    	else {
+    		order="SD?";
+    	}
+    	
+    	OrderState=orderState.TakingFoodToCustomer;
             if (tableN==1){
             	xDestination = xTable1 + shifttwenty;
                 yDestination = yTable1 - shifttwenty;
@@ -140,6 +171,7 @@ public class WaiterGui implements Gui {
     }
 
     public void DoLeaveCustomer() {
+    	OrderState=orderState.noOrder;
         xDestination = -shifttwenty;
         yDestination = -shifttwenty;
     }
