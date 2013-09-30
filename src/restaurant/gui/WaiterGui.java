@@ -27,6 +27,9 @@ public class WaiterGui implements Gui {
     
     public static final int xTable3 = 640;
     public static final int yTable3 = 250;
+    
+    public static final int cookX = 900;
+    public static final int cookY = 150;
 
     public WaiterGui(WaiterAgent agent) {
         this.agent = agent;
@@ -61,7 +64,7 @@ public class WaiterGui implements Gui {
            agent.msgAtFront();
         }
         else if (xPos == xDestination && yPos == yDestination
-        		& (xDestination ==900) & (yDestination == 150)) {
+        		& (xDestination == cookX) & (yDestination == cookY)) {
            agent.msgAtCook();
         }
     }
@@ -69,15 +72,15 @@ public class WaiterGui implements Gui {
     public void DoGoToCook() {
     	//order=choice;
     	//OrderState=orderState.takingOrderToCook;
-    	xDestination=900;
-    	yDestination=150;
+    	xDestination=cookX;
+    	yDestination=cookY;
     }
     
     public void BringOrderToCook(String choice) {
     	order=choice;
     	OrderState=orderState.takingOrderToCook;
-    	xDestination=900;
-    	yDestination=150;
+    	xDestination=cookX;
+    	yDestination=cookY;
     }
 
     public void draw(Graphics2D g) {
@@ -97,19 +100,19 @@ public class WaiterGui implements Gui {
         if (n==1){
         	xDestination = xTable1 + shifttwenty;
             yDestination = yTable1 - shifttwenty;
-            customer.msgGoToDest(xTable1,yTable1);
+            customer.getGui().msgGoToXY(xTable1,yTable1);
 
         }
         else if (n==2){
         	xDestination = xTable2 + shifttwenty;
             yDestination = yTable2 - shifttwenty;
-            customer.msgGoToDest(xTable2,yTable2);
+            customer.getGui().msgGoToXY(xTable2,yTable2);
 
         }
         else if (n==3){
         	xDestination = xTable3 + shifttwenty;
             yDestination = yTable3 - shifttwenty;
-            customer.msgGoToDest(xTable3,yTable3);
+            customer.getGui().msgGoToXY(xTable3,yTable3);
 
         }
     }

@@ -50,6 +50,8 @@ public class RestaurantGui extends JFrame implements ActionListener {
         int winx = 450;
         int space = 50;
         int WINDOWY = 350;
+        double windowfraction = .95;
+        double smallwindowfraction = .25;
 
        /* animationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         animationFrame.setBounds(winx, winx , winx, WINDOWY);
@@ -62,7 +64,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
         setLayout(new BoxLayout((Container) getContentPane(), 
         		BoxLayout.Y_AXIS));
 
-        Dimension restDim = new Dimension(WINDOWX, (int) (WINDOWY * .95));
+        Dimension restDim = new Dimension(WINDOWX, (int) (WINDOWY * windowfraction));
         restPanel.setPreferredSize(restDim);
         restPanel.setMinimumSize(restDim);
         restPanel.setMaximumSize(restDim);
@@ -70,7 +72,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
         
         add(animationPanel);
         // Now, setup the info panel
-        Dimension infoDim = new Dimension(winx, (int) (WINDOWY * .25));
+        Dimension infoDim = new Dimension(winx, (int) (WINDOWY * smallwindowfraction));
         infoPanel = new JPanel();
         infoPanel.setPreferredSize(infoDim);
         infoPanel.setMinimumSize(infoDim);

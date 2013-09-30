@@ -104,7 +104,8 @@ public class CustomerGui implements Gui{
 	public void DoGoToSeat(int seatnumber) {//later you will map seatnumber to table coordinates.
 		//xDestination = xTable;
 		//yDestination = yTable;
-		
+		command = Command.GoToSeat;
+
 	}
 	
 	public void EatTime(String choice) {
@@ -126,7 +127,6 @@ public class CustomerGui implements Gui{
 	public void msgGoToXY(int x, int y){
 		xDestination = x;
 		yDestination = y;
-		command = Command.GoToSeat;
 	}
 
 	public void DoExitRestaurant() {

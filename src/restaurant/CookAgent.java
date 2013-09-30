@@ -98,17 +98,17 @@ public class CookAgent extends Agent {
 
 	// Actions
 	public void callWaiter(Order o) {
-		o.getWaiter().msgOrderReady(o.order.choice, o.getTableNumber());
+		o.getWaiter().msgOrderReady(o.order.getChoice(), o.getTableNumber());
 	}
 	
 	public void Cook(final Order o) {		
-		print("Stated cooking " + o.order.choice);
+		print("Started cooking " + o.order.getChoice());
 		timer.schedule(new TimerTask() {
 			Object cook = 1;
 			public void run() {
 				//look at menu, call waiter when ready
 				o.setStateDone();
-				print("Finished cooking " + o.order.choice);
+				print("Finished cooking " + o.order.getChoice());
 				//waiter.msgReadyToOrder(temp);
 				stateChanged();
 			}
@@ -136,6 +136,10 @@ public class CookAgent extends Agent {
 			else {
 				cooktime=5000;
 			}
+		}
+		
+		String getChoice() {
+			return choice;
 		}
 	}
 	

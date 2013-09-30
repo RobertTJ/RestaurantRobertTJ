@@ -30,8 +30,8 @@ public class WaiterAgent extends Agent {
 	
 	public enum CustState {Seating, Seated, ReadyToOrder, Ordered, WaitingForFood, OrderOut, Eating, Done, Leaving, Gone};
 
-	public List<Customers> myCustomers
-	= new ArrayList<Customers>();
+	public List<MyCustomers> myCustomers
+	= new ArrayList<MyCustomers>();
 	
 	private List<Event> allEvents = new ArrayList<Event>();
 
@@ -42,12 +42,14 @@ public class WaiterAgent extends Agent {
 	
 	public boolean busy = false;
 	
-	private Customers CurrentCustomer;
+	private MyCustomers CurrentCustomer;
 	
 	private Semaphore atTable = new Semaphore(0,true);
 	private Semaphore atCook = new Semaphore(0,true);
 	private Semaphore working = new Semaphore(0,true);
 	String name;
+	
+	private Menu currentMenu = new Menu();
 
 	public WaiterGui waiterGui = null;
 	
@@ -79,7 +81,7 @@ public class WaiterAgent extends Agent {
 	public void msgNewCustomerToSeat(CustomerAgent cust, int table){
 		event = Event.NewCustomerToSeat;
 		allEvents.add(event);
-		CurrentCustomer= new Customers(cust,table);
+		CurrentCustomer= new MyCustomers(cust,table);
 		CurrentCustomer.setState(CustState.Seating);
 		myCustomers.add(CurrentCustomer);
 		tablenumber=table;
@@ -87,7 +89,7 @@ public class WaiterAgent extends Agent {
 	}
 
 	public void msgLeavingTable(CustomerAgent cust) {
-		for (Customers myCustomer : myCustomers) {
+		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getCustomer() == cust) {
 				myCustomer.setState(CustState.Done);
 				//myCustomers.remove(myCustomer);
@@ -105,7 +107,7 @@ public class WaiterAgent extends Agent {
 	}
 	
 	public void msgReadyToOrder(CustomerAgent cust) {
-		for (Customers myCustomer : myCustomers) {
+		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getCustomer() == cust) myCustomer.setState(CustState.ReadyToOrder);
 		}
 		
@@ -116,7 +118,7 @@ public class WaiterAgent extends Agent {
 	
 	public void msgOrderFood(CustomerAgent cust, String food) {
 		//print("test "+ this.state);
-		for (Customers myCustomer : myCustomers) {
+		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getCustomer() == cust) {
 				myCustomer.setState(CustState.Ordered);
 				myCustomer.setOrder(food);
@@ -130,12 +132,7 @@ public class WaiterAgent extends Agent {
 	 }
 	
 	public void msgAtFront(){
-		/*try {
-			working.acquire();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+		
 		this.state = AgentState.DoingNothing;
 		//print("Do I ever get here?");
 		busy=false;
@@ -152,7 +149,7 @@ public class WaiterAgent extends Agent {
 	
 	public void msgOrderReady(String food, int table) {
 		print ("Order Ready");
-		for (Customers myCustomer : myCustomers) {
+		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getTableNumber() == table) {
 				myCustomer.setState(CustState.Eating);
 				CurrentCustomer = myCustomer;
@@ -229,7 +226,7 @@ public class WaiterAgent extends Agent {
 
 					if (currentEvent==Event.FoodReady) {
 						this.state = AgentState.ServeFood;
-						for (Customers myCustomer : myCustomers) {
+						for (MyCustomers myCustomer : myCustomers) {
 							if (myCustomer.getState() == CustState.WaitingForFood) {
 								myCustomer.setState(CustState.OrderOut);
 								CurrentCustomer = myCustomer;
@@ -255,7 +252,7 @@ public class WaiterAgent extends Agent {
 
 						this.state = AgentState.TakeOrderToCook;
 						//print("test2");
-						for (Customers myCustomer : myCustomers) {
+						for (MyCustomers myCustomer : myCustomers) {
 							if (myCustomer.getState() == CustState.Ordered) {
 								//myCustomer.setState(5);
 								//CurrentCustomer = myCustomer;
@@ -295,7 +292,7 @@ public class WaiterAgent extends Agent {
 	// Actions
 
 	private void seatCustomer() {
-		for (Customers myCustomer : myCustomers) {
+		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getState()==CustState.Seating) {
 				myCustomer.setState(CustState.Seated);
 				CurrentCustomer = myCustomer;
@@ -303,7 +300,7 @@ public class WaiterAgent extends Agent {
 			}
 		}
 		
-		CurrentCustomer.getCustomer().msgSitAtTable(this);
+		CurrentCustomer.getCustomer().msgFollowMeToTable(this, currentMenu);
 		DoSeatCustomer(CurrentCustomer.getCustomer(), CurrentCustomer.getTableNumber());
 		try {
 			atTable.acquire();
@@ -321,14 +318,14 @@ public class WaiterAgent extends Agent {
 	private void DoSeatCustomer(CustomerAgent customer, int table) {
 		//Notice how we print "customer" directly. It's toString method will do it.
 		//Same with "table"
-		print("Seating " + customer + " at " + table);
+		print("Seating " + customer + " at " + table + ".  Here is a menu.");
 		waiterGui.DoBringToTable(customer, table); 
 
 	}
 	
 	public void GetCustomerOrder() {
 		print("Going to get order");// " + this.state);
-		for (Customers myCustomer : myCustomers) {
+		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getState()==CustState.ReadyToOrder) {
 				CurrentCustomer = myCustomer;
 				break;
@@ -355,7 +352,7 @@ public class WaiterAgent extends Agent {
 		print("Here for order");
 	}
 	
-	public void TakeOrderToKitchen(Customers current) {
+	public void TakeOrderToKitchen(MyCustomers current) {
 		print("Taking order to chef");
 		waiterGui.BringOrderToCook(current.getOrder());
 		try {
@@ -373,7 +370,7 @@ public class WaiterAgent extends Agent {
 	}
 
 	
-    public void DeliverFoodToTable(Customers current) {
+    public void DeliverFoodToTable(MyCustomers current) {
     	waiterGui.DoGoToCook();
     	try {
 			atCook.acquire();
@@ -401,7 +398,7 @@ public class WaiterAgent extends Agent {
 
 	public void PrepareTable() {
 		print("Table empty");
-		for (Customers myCustomer : myCustomers) {
+		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getState()==CustState.Done) {
 				CurrentCustomer = myCustomer;
 				break;
@@ -434,13 +431,40 @@ public class WaiterAgent extends Agent {
 		return waiterGui;
 	}
 	
-	private class Customers {
+	public class Menu {
+		String optionOne = "Pizza";
+		String optionTwo = "Steak";
+		String optionThree = "Salad";
+		String optionFour = "Chicken";
+		
+		Menu() {
+			
+		}
+		
+		String ChooseOne() {
+			return optionOne;
+		}
+		
+		String ChooseTwo() {
+			return optionTwo;
+		}
+		
+		String ChooseThree() {
+			return optionThree;
+		}
+		
+		String ChooseFour() {
+			return optionFour;
+		}
+	}
+	
+	private class MyCustomers {
 		CustomerAgent customer;
 		int tableNumber;
 		String order;
 		CustState currentState;
 
-		Customers(CustomerAgent customer, int tableNumber) {
+		MyCustomers(CustomerAgent customer, int tableNumber) {
 			this.tableNumber = tableNumber;
 			this.customer = customer;
 		}

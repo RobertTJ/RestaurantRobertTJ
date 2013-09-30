@@ -123,7 +123,7 @@ public class HostAgent extends Agent {
 	// Actions
 
 	private void seatCustomer(WaiterAgent waiter, CustomerAgent customer, Table table) {
-		waiter.msgNewCustomerToSeat(customer, table.tableNumber);		
+		waiter.msgNewCustomerToSeat(customer, table.getTable());		
 		print(waiter.getName() + " seating " + customer + " at " + table);
 		/*try {
 			atTable.acquire();
@@ -167,6 +167,10 @@ public class HostAgent extends Agent {
 
 		Table(int tableNumber) {
 			this.tableNumber = tableNumber;
+		}
+		
+		public int getTable() {
+			return tableNumber;
 		}
 
 		void setOccupant(CustomerAgent cust) {

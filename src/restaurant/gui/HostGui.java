@@ -81,19 +81,19 @@ public class HostGui implements Gui {
         if (n==1){
         	xDestination = xTable1 + shifttwenty;
             yDestination = yTable1 - shifttwenty;
-            customer.msgGoToDest(xTable1,yTable1);
+            //customer.msgGoToDest(xTable1,yTable1);
 
         }
         else if (n==2){
         	xDestination = xTable2 + shifttwenty;
             yDestination = yTable2 - shifttwenty;
-            customer.msgGoToDest(xTable2,yTable2);
+           // customer.msgGoToDest(xTable2,yTable2);
 
         }
         else if (n==3){
         	xDestination = xTable3 + shifttwenty;
             yDestination = yTable3 - shifttwenty;
-            customer.msgGoToDest(xTable3,yTable3);
+           // customer.msgGoToDest(xTable3,yTable3);
 
         }
         

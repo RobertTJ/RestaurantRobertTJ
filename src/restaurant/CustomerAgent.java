@@ -1,5 +1,6 @@
 package restaurant;
 
+import restaurant.WaiterAgent.Menu;
 import restaurant.gui.CustomerGui;
 import restaurant.gui.RestaurantGui;
 import agent.Agent;
@@ -17,6 +18,7 @@ public class CustomerAgent extends Agent {
 	private int hungerLevel = 5;        // determines length of meal
 	Timer timer = new Timer();
 	private CustomerGui customerGui;
+	private Menu menu;
 
 	// agent correspondents
 	private HostAgent host;
@@ -28,7 +30,7 @@ public class CustomerAgent extends Agent {
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	public enum AgentEvent 
-	{none, gotHungry, followHost, seated, beingHelped, gotFood, doneEating, doneLeaving};
+	{none, gotHungry, followWaiter, seated, beingHelped, gotFood, doneEating, doneLeaving};
 	AgentEvent event = AgentEvent.none;
 
 	/**
@@ -64,15 +66,11 @@ public class CustomerAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void msgSitAtTable(WaiterAgent w) {
+	public void msgFollowMeToTable(WaiterAgent w, Menu m) {
 		this.waiter=w;
+		this.menu = m;
 		print("Received msgSitAtTable");
-		event = AgentEvent.followHost;
-		stateChanged();
-	}
-	
-	public void msgGoToDest(int x, int y){
-		customerGui.msgGoToXY(x, y);
+		event = AgentEvent.followWaiter;
 		stateChanged();
 	}
 
@@ -107,14 +105,14 @@ public class CustomerAgent extends Agent {
 			goToRestaurant();
 			return true;
 		}
-		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followHost ){
+		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followWaiter ){
 			state = AgentState.BeingSeated;
 			SitDown();
 			return true;
 		}
 		if (state == AgentState.BeingSeated && event == AgentEvent.seated){
 			state = AgentState.Seated;
-			PeruseMenu();
+			PickUpAndPeruseMenu();
 			return true;
 		}
 		if (state == AgentState.Seated && event == AgentEvent.beingHelped) {
@@ -152,9 +150,10 @@ public class CustomerAgent extends Agent {
 		
 		Do("Being seated. Going to table");
 		//customerGui.DoGoToSeat(1);//hack; only one table
+		customerGui.DoGoToSeat(1);
 	}
 	
-	private void PeruseMenu() {
+	private void PickUpAndPeruseMenu() {
 	CustomerAgent temp = this;
 		timer.schedule(new TimerTask() {
 			Object cookies = 1;
@@ -180,18 +179,18 @@ public class CustomerAgent extends Agent {
 		print("Randomed " + select);
 		
 		if (select == 0) {
-			order = "Pizza";
+			order = menu.ChooseOne();
 		}
 		else if (select == 1) {
-			order = "Steak";
+			order = menu.ChooseTwo();
 		}
 		else if (select == 2) {
-			order = "Salad";
+			order = menu.ChooseThree();
 		}
 		else {
-			order = "Chicken";
+			order = menu.ChooseFour();
 		}
-		waiter.msgOrderFood(this, order);
+		waiter.msgOrderFood(this, this.getOrder());
 		//print("in cust execution?");
 		stateChanged();
 	}
@@ -256,6 +255,7 @@ public class CustomerAgent extends Agent {
 	public CustomerGui getGui() {
 		return customerGui;
 	}
+	
 	
 	
 }
