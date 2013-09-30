@@ -99,6 +99,7 @@ public class CookAgent extends Agent {
 	// Actions
 	public void callWaiter(Order o) {
 		o.getWaiter().msgOrderReady(o.order.getChoice(), o.getTableNumber());
+		stateChanged();
 	}
 	
 	public void Cook(final Order o) {		

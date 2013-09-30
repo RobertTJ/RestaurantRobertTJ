@@ -69,7 +69,7 @@ public class CustomerAgent extends Agent {
 	public void msgFollowMeToTable(WaiterAgent w, Menu m) {
 		this.waiter=w;
 		this.menu = m;
-		print("Received msgSitAtTable");
+		//print("Received msgSitAtTable");
 		event = AgentEvent.followWaiter;
 		stateChanged();
 	}
@@ -148,7 +148,7 @@ public class CustomerAgent extends Agent {
 
 	private void SitDown() {
 		
-		Do("Being seated. Going to table");
+		//Do("Being seated. Going to table");
 		//customerGui.DoGoToSeat(1);//hack; only one table
 		customerGui.DoGoToSeat(1);
 	}
@@ -176,7 +176,7 @@ public class CustomerAgent extends Agent {
 		Random generator = new Random();
 		int select = generator.nextInt(4);
 				
-		print("Randomed " + select);
+		//print("Randomed " + select);
 		
 		if (select == 0) {
 			order = menu.ChooseOne();
@@ -190,6 +190,7 @@ public class CustomerAgent extends Agent {
 		else {
 			order = menu.ChooseFour();
 		}
+		print("I want " + order);
 		waiter.msgOrderFood(this, this.getOrder());
 		//print("in cust execution?");
 		stateChanged();
@@ -209,7 +210,8 @@ public class CustomerAgent extends Agent {
 		timer.schedule(new TimerTask() {
 			Object cookie = 1;
 			public void run() {
-				print("Done eating, cookie=" + cookie);
+				//print("Done eating, cookie=" + cookie);
+				print("Done eating");
 				event = AgentEvent.doneEating;
 				//isHungry = false;
 				stateChanged();

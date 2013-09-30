@@ -318,7 +318,7 @@ public class WaiterAgent extends Agent {
 	private void DoSeatCustomer(CustomerAgent customer, int table) {
 		//Notice how we print "customer" directly. It's toString method will do it.
 		//Same with "table"
-		print("Seating " + customer + " at " + table + ".  Here is a menu.");
+		print("Seating " + customer + " at table " + table + ".  Here is a menu.");
 		waiterGui.DoBringToTable(customer, table); 
 
 	}
