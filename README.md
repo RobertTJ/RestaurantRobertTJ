@@ -19,7 +19,7 @@
   + becomes the new customer's name and his/her initial hunger status is determined by the state of the "Hungry?" 
   + checkbox next to the "Add Customer" button: selected to start hungry and unselected to start not hungry.
   + Waiters are added by clicking the "Add Waiter" button, at which point the current text in the text field 
-  + becomes the new waiter's name.
+  + becomes the new waiter's name.  There is no list of waiters shown, but they are added when the button is pressed.
   + The "Pause" button pauses the actions of each agent after they have completed their current action, but before they 
   + attempt to select another action.  After the "Pause" button is pressed it is replaced by a "Resume" button in the 
   + same location.  Pressing the "Resume" button resumes normal agent action and replaces the "Resume" button with the
