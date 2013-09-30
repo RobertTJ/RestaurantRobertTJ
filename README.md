@@ -24,3 +24,6 @@
   + attempt to select another action.  After the "Pause" button is pressed it is replaced by a "Resume" button in the 
   + same location.  Pressing the "Resume" button resumes normal agent action and replaces the "Resume" button with the
   + "Pause" button once more.
+
+###Design Documents
+  +Design documents are in the Design Doc folder in SRC in PDF format
