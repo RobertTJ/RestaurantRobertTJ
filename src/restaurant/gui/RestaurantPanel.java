@@ -52,6 +52,7 @@ public class RestaurantPanel extends JPanel {
         this.gui = gui;
         
         host.setGui(hostGui);
+        host.setRestGui(gui);
        
       // waiter.setGui(waiterGui);
         //waiter2.setGui(waiterGui2);
@@ -135,6 +136,16 @@ public class RestaurantPanel extends JPanel {
         }
     }*/
     
+    public void OnBreak(WaiterAgent w) {
+    	WaiterAgent temp = new WaiterAgent("Ted");
+        for (int i = 0; i < waiters.size(); i++) {
+        	temp=waiters.get(i);
+        	if (temp==w){
+        		customerPanel.WOnBreak(i);
+        	}
+        }
+    }
+    
     public void findcust(CustomerAgent c){
     	CustomerAgent temp = new CustomerAgent("Ted");
         for (int i = 0; i < customers.size(); i++) {
@@ -147,11 +158,27 @@ public class RestaurantPanel extends JPanel {
     
     public void actionTime(int i) {
     	
-        		 CustomerAgent temp = new CustomerAgent("Ted");
-        		 temp=customers.get(i);
-                 temp.getGui().setHungry();
+        CustomerAgent temp = new CustomerAgent("Ted");
+        temp=customers.get(i);
+        temp.getGui().setHungry();
     }
         
+    public void BreakTime(int i) {
+    	WaiterAgent temp = new WaiterAgent("Ted");
+    	temp = waiters.get(i);
+    	if (waiters.size() >1 )	temp.msgIWantToGoOnBreak();
+    	else {
+    		temp.msgCantBreakNow();
+    		customerPanel.CantBreakNow(i);
+    	}
+    }
+    
+    public void BreakTimeOver(int i) {
+    	WaiterAgent temp = new WaiterAgent("Ted");
+    	temp = waiters.get(i);
+    	temp.msgBreakOver();
+    	
+    }
     
     public void pause() {
     	host.Pause();
@@ -214,7 +241,7 @@ public class RestaurantPanel extends JPanel {
     		WaiterGui wg = new WaiterGui(w);
     		
     		w.setGui(wg);
-    	    host.allWaiters.add(w);
+    	    host.msgNewWaiter(w);
     	    //host.customersServed.add(0);
 
     	    w.SetHost (host);

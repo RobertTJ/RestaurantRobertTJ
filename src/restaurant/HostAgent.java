@@ -3,6 +3,7 @@ package restaurant;
 import agent.Agent;
 import restaurant.CustomerAgent.AgentState;
 import restaurant.gui.HostGui;
+import restaurant.gui.RestaurantGui;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -20,12 +21,13 @@ public class HostAgent extends Agent {
 	//with List semantics.
 	public List<CustomerAgent> waitingCustomers
 	= new ArrayList<CustomerAgent>();
-	public List<WaiterAgent> allWaiters
-	= new ArrayList<WaiterAgent>();
+	public List<MyWaiters> allWaiters
+	= new ArrayList<MyWaiters>();
 	//public Vector<Integer> customersServed = new Vector<Integer>(10);
 	public Collection<Table> tables;
 	//note that tables is typed with Collection semantics.
 	//Later we will see how it is implemented
+	public RestaurantGui RestGUI;
 	
 	public enum AgentState
 	{DoingNothing, SeatingCustomer};
@@ -37,6 +39,11 @@ public class HostAgent extends Agent {
 	public HostGui hostGui = null;
 	
 	private int LeastBusyWaiter=0;
+	private int WaiterOnBreak=-1;
+	
+	public void setRestGui (RestaurantGui g) {
+		RestGUI = g;
+	}
 
 	public HostAgent(String name) {
 		super();
@@ -66,6 +73,11 @@ public class HostAgent extends Agent {
 	}
 	// Messages
 	
+	public void msgNewWaiter(WaiterAgent w) {
+		allWaiters.add(new MyWaiters(w));
+		stateChanged();
+	}
+	
 	public void msgImFree(WaiterAgent w) {
 		stateChanged();
 	}
@@ -75,14 +87,42 @@ public class HostAgent extends Agent {
 		stateChanged();
 	}
 
-	public void msgLeavingTable(CustomerAgent cust) {
+	public void msgLeavingTable(CustomerAgent cust, WaiterAgent w) { //TO DO - add waiter pass to call myWaiters customer--
 		for (Table table : tables) {
 			if (table.getOccupant() == cust) {
 				print(cust + " leaving " + table);
 				table.setUnoccupied();
-				stateChanged();
 			}
 		}
+		
+		for ( int i =0; i<allWaiters.size();i++) {
+			if (w == allWaiters.get(i).GetWaiter()) {
+				allWaiters.get(i).CustomerDone();
+			}
+		}
+		stateChanged();
+
+	}
+	
+	public void msgIWantABreak(WaiterAgent w) {
+		for ( int i =0; i<allWaiters.size();i++) {
+			if (w == allWaiters.get(i).GetWaiter()) {
+				allWaiters.get(i).IWantABreak();
+				print(allWaiters.get(i).GetWaiter().getName() + " wants a break");
+			}
+		}
+		stateChanged();
+	}
+	
+	public void msgBackFromBreak(WaiterAgent w) {
+		for ( int i =0; i<allWaiters.size();i++) {
+			if (w == allWaiters.get(i).GetWaiter()) {
+				allWaiters.get(i).BackFromBreak();
+				print(allWaiters.get(i).GetWaiter().getName() + " is back from break");
+				WaiterOnBreak = -1;
+			}
+		}
+		stateChanged();
 	}
 
 
@@ -95,25 +135,49 @@ public class HostAgent extends Agent {
             so that table is unoccupied and customer is waiting.
             If so seat him at the table.
 		 */
-		for (Table table : tables) {
-			if (!table.isOccupied()) {
-				if (!waitingCustomers.isEmpty()) {
-					
-					seatCustomer( allWaiters.get(LeastBusyWaiter), waitingCustomers.get(0), table);
-					
-					LeastBusyWaiter++;
-					
-					if(LeastBusyWaiter >= allWaiters.size()) {
-						LeastBusyWaiter=0;
-					}
-					// increments around the wiater list, assigned each subsequent customer to 
-					//the next waiter in allWaiters and loops back around to the first at the end
+		//if (WaiterOnBreak)
+		
+		for ( int i =0; i<allWaiters.size();i++) {
+			if (allWaiters.get(i).GetWantABreak() == true && allWaiters.get(i).GetNumberOfCustomers()==0) {
+				if (WaiterOnBreak == -1 && allWaiters.size()>1) {
+					allWaiters.get(i).TakeABreak();
+					allWaiters.get(i).GetWaiter().msgTakeABreak();
+					WaiterOnBreak=i;
+					RestGUI.OnABreak(allWaiters.get(i).GetWaiter());
+					print(allWaiters.get(i).GetWaiter().getName() + " is taking a break");
 
-					return true;//return true to the abstract agent to reinvoke the scheduler.	
 				}
 			}
 		}
+		
+		
+		if(!allWaiters.isEmpty())
+		{
+		for (Table table : tables) {
+			if (!table.isOccupied()) {
+				if (!waitingCustomers.isEmpty()) {
+					for ( int i =0; i<allWaiters.size();i++) {
+						if (WaiterOnBreak!=0)	LeastBusyWaiter = 0;
+						else LeastBusyWaiter = 1;
+						if (allWaiters.get(i).GetNumberOfCustomers() < allWaiters.get(LeastBusyWaiter).GetNumberOfCustomers() && i != WaiterOnBreak) {
+							LeastBusyWaiter = i;
+						}
+					}
+					
+					
+					
+					seatCustomer( allWaiters.get(LeastBusyWaiter).GetWaiter(), waitingCustomers.get(0), table);
+					allWaiters.get(LeastBusyWaiter).AddCustomer();
+					
+					
+					// increments around the waiter list, assigned each subsequent customer to 
+					//the next waiter in allWaiters and loops back around to the first at the end
 
+					return true;//return true to the abstract agent to re-invoke the scheduler.	
+				}
+			}
+		}
+		}
 		return false;
 		//we have tried all our rules and found
 		//nothing to do. So return false to main loop of abstract agent
@@ -160,6 +224,58 @@ public class HostAgent extends Agent {
 	public HostGui getGui() {
 		return hostGui;
 	}
+	
+	private class MyWaiters {
+		WaiterAgent waiter;
+		boolean WantABreak;
+		boolean OnBreak;
+		int NumberOfCustomers;
+		
+		MyWaiters (WaiterAgent w) {
+			waiter = w;
+			WantABreak =false;
+			OnBreak = false;
+			NumberOfCustomers = 0;
+		}
+		
+		public WaiterAgent GetWaiter() {
+			return waiter;
+		}
+		
+		public int GetNumberOfCustomers() {
+			return NumberOfCustomers;
+		}
+		
+		public boolean GetOnBreak() {
+			return OnBreak;
+		}
+		
+		public boolean GetWantABreak() {
+			return WantABreak;
+		}
+		
+		public void IWantABreak() {
+			WantABreak = true;
+		}
+		
+		public void TakeABreak() {
+			OnBreak = true;
+			WantABreak = false;
+		}
+		
+		public void BackFromBreak() {
+			OnBreak = false;
+		}
+		
+		public void AddCustomer() {
+			NumberOfCustomers++;
+		}
+		
+		public void CustomerDone() {
+			NumberOfCustomers--;
+		}
+	}
+	
 
 	private class Table {
 		CustomerAgent occupiedBy;

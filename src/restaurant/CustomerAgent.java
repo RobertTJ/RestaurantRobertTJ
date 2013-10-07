@@ -23,14 +23,15 @@ public class CustomerAgent extends Agent {
 	// agent correspondents
 	private HostAgent host;
 	private WaiterAgent waiter;
+	int select;
 
 	//    private boolean isHungry = false; //hack for gui
 	public enum AgentState
-	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, Ordered, Eating, DoneEating, Leaving};
+	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, Ordered, WaitingForFood, Eating, DoneEating, Leaving};
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	public enum AgentEvent 
-	{none, gotHungry, followWaiter, seated, beingHelped, gotFood, doneEating, doneLeaving};
+	{none, gotHungry, followWaiter, seated, beingHelped, beingHelpedAgain, gotFood, doneEating, doneLeaving};
 	AgentEvent event = AgentEvent.none;
 
 	/**
@@ -79,11 +80,18 @@ public class CustomerAgent extends Agent {
 		event = AgentEvent.seated;
 		stateChanged();
 	}
+	
 	public void msgAnimationFinishedLeaveRestaurant() {
 		//from animation
 		event = AgentEvent.doneLeaving;
 		stateChanged();
 	}
+	
+	public void msgHereForNewOrder() {
+		event = AgentEvent.beingHelpedAgain;
+		stateChanged();
+	}
+	
 	public void msgHereForOrder() {
 		event = AgentEvent.beingHelped;
 		stateChanged();
@@ -121,7 +129,12 @@ public class CustomerAgent extends Agent {
 			OrderFood();
 			return true;
 		}
-		if (state == AgentState.Ordered && event == AgentEvent.gotFood) {
+		if ((state == AgentState.Ordered || state == AgentState.WaitingForFood) && event == AgentEvent.beingHelpedAgain) {
+			state = AgentState.WaitingForFood;
+			OrderNewFood();
+			return true;
+		}
+		if ((state == AgentState.Ordered || state == AgentState.WaitingForFood) && event == AgentEvent.gotFood) {
 			state = AgentState.Eating;
 			EatFood();
 			return true;
@@ -171,10 +184,40 @@ public class CustomerAgent extends Agent {
 		print("I am ready to order");
 	}
 	
-	private void OrderFood() {
+private void OrderNewFood() {
 		
 		Random generator = new Random();
-		int select = generator.nextInt(4);
+		select++;
+		if (select == 4) {
+			select = 0;
+		}
+				
+		//print("Randomed " + select);
+		
+		if (select == 0) {
+			order = menu.ChooseOne();
+		}
+		else if (select == 1) {
+			order = menu.ChooseTwo();
+		}
+		else if (select == 2) {
+			order = menu.ChooseThree();
+		}
+		else {
+			order = menu.ChooseFour();
+		}
+		print("I want " + order + " now");
+		waiter.msgOrderFood(this, this.getOrder());
+		//print("in cust execution?");
+		event=null;
+		stateChanged();
+	}
+	
+	private void OrderFood() {
+		print("Check me");
+		Random generator = new Random();
+		select = generator.nextInt(4);
+		select = 0;
 				
 		//print("Randomed " + select);
 		
@@ -217,7 +260,7 @@ public class CustomerAgent extends Agent {
 				stateChanged();
 			}
 		},
-		50000);//getHungerLevel() * 1000);//how long to wait before running task
+		5000);//getHungerLevel() * 1000);//how long to wait before running task
 	}
 
 	private void leaveTable() {

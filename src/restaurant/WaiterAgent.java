@@ -18,17 +18,17 @@ import java.util.concurrent.Semaphore;
 public class WaiterAgent extends Agent {
 	
 	public enum AgentState
-	{DoingNothing, SeatingCustomer, GetOrder, TakeOrderToCook, ServeFood, CleanTable};
+	{DoingNothing, SeatingCustomer, GetOrder, TakeOrderToCook, ServeFood, CleanTable, Break};
 	
 	public AgentState state = AgentState.DoingNothing;//The start state
 	
 	public enum Event
-	{NewCustomerToSeat, DoneSeating, customerReady, GotOrder, FoodReady, customerDone};
+	{NewCustomerToSeat, DoneSeating, customerReady, GotOrder, FoodReady, customerDone, OutOfFood, WantABreak, TakeABreak};
 	
 	private Event event = Event.DoneSeating;
 	private Event currentEvent = Event.DoneSeating;
 	
-	public enum CustState {Seating, Seated, ReadyToOrder, Ordered, WaitingForFood, OrderOut, Eating, Done, Leaving, Gone};
+	public enum CustState {NewOrderNeeded, Seating, Seated, ReadyToOrder, Ordered, WaitingForFood, OrderOut, Eating, Done, Leaving, Gone};
 
 	public List<MyCustomers> myCustomers
 	= new ArrayList<MyCustomers>();
@@ -77,6 +77,20 @@ public class WaiterAgent extends Agent {
 		return name;
 	}
 	// Messages
+	
+	public void msgCantBreakNow() {
+		print("I can't take a break now!");
+		//stateChanged();
+	}
+	
+	public void msgGetNewOrder(CustomerAgent cust) {
+		for (MyCustomers myCustomer : myCustomers) {
+			if (myCustomer.getCustomer() == cust) myCustomer.setState(CustState.NewOrderNeeded);
+		}
+		event = Event.OutOfFood;
+		allEvents.add(event);
+		stateChanged();
+	}
 
 	public void msgNewCustomerToSeat(CustomerAgent cust, int table){
 		event = Event.NewCustomerToSeat;
@@ -160,6 +174,24 @@ public class WaiterAgent extends Agent {
 		allEvents.add(event);
 		stateChanged();
 	}
+	
+	public void msgIWantToGoOnBreak() {
+		event=Event.WantABreak;
+		allEvents.add(event);
+		stateChanged();
+	}
+	
+	public void msgTakeABreak() {
+		event=Event.TakeABreak;
+		allEvents.add(event);
+		stateChanged();
+	}
+	
+	public void msgBreakOver() {
+		this.Resume();
+		host.msgBackFromBreak(this);
+		stateChanged();
+	}
 
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
@@ -168,6 +200,26 @@ public class WaiterAgent extends Agent {
 		
 		
 		//if (currentEvent)
+		
+		for (Event pendingEvents : allEvents) {
+			if (pendingEvents == Event.TakeABreak) {
+				//print("in here execution?");
+				busy=true;
+				currentEvent = pendingEvents;
+				//allEvents.remove(pendingEvents);
+				break;
+			}
+		}
+		
+		for (Event pendingEvents : allEvents) {
+			if (pendingEvents == Event.WantABreak) {
+				//print("in here execution?");
+				busy=true;
+				currentEvent = pendingEvents;
+				//allEvents.remove(pendingEvents);
+				break;
+			}
+		}
 		
 		for (Event pendingEvents : allEvents) {
 			if (pendingEvents == Event.GotOrder && this.state == AgentState.GetOrder) {
@@ -193,6 +245,14 @@ public class WaiterAgent extends Agent {
 		for (Event pendingEvents : allEvents) {
 			if (pendingEvents == Event.NewCustomerToSeat && busy == false) {
 				//print("but this works!");
+				busy=true;
+				currentEvent = pendingEvents;
+				//allEvents.remove(pendingEvents);
+				break;
+			}
+		}
+		for (Event pendingEvents : allEvents) {
+			if (pendingEvents == Event.OutOfFood && busy == false) {
 				busy=true;
 				currentEvent = pendingEvents;
 				//allEvents.remove(pendingEvents);
@@ -235,6 +295,29 @@ public class WaiterAgent extends Agent {
 						}
 						allEvents.remove(currentEvent);
 						DeliverFoodToTable(CurrentCustomer);
+						currentEvent=null;
+						return true;
+					}
+					
+					if (currentEvent==Event.OutOfFood) {
+						this.state = AgentState.GetOrder;
+						allEvents.remove(currentEvent);
+						GetNewCustomerOrder();
+						currentEvent=null;
+						return true;
+					}
+					
+					if (currentEvent==Event.WantABreak) {
+						allEvents.remove(currentEvent);
+						GiveMeABreak();
+						currentEvent=null;
+						return true;
+					}
+					
+					if (currentEvent==Event.TakeABreak) {
+						print("testing");
+						allEvents.remove(currentEvent);
+						TakeABreak();
 						currentEvent=null;
 						return true;
 					}
@@ -290,6 +373,17 @@ public class WaiterAgent extends Agent {
 	}
 
 	// Actions
+	
+	private void TakeABreak() {
+		this.Pause();
+		stateChanged();
+	}
+	
+	private void GiveMeABreak() {
+		//print ("hmm?");
+		host.msgIWantABreak(this);
+		stateChanged();
+	}
 
 	private void seatCustomer() {
 		for (MyCustomers myCustomer : myCustomers) {
@@ -321,6 +415,35 @@ public class WaiterAgent extends Agent {
 		print("Seating " + customer + " at table " + table + ".  Here is a menu.");
 		waiterGui.DoBringToTable(customer, table); 
 
+	}
+	
+	public void GetNewCustomerOrder() {
+		print("Going to get a new order");// " + this.state);
+		for (MyCustomers myCustomer : myCustomers) {
+			if (myCustomer.getState()==CustState.NewOrderNeeded) {
+				CurrentCustomer = myCustomer;
+				break;
+			}
+		}
+		//print("hi  "+this.state);
+		waiterGui.DoGoToTable(CurrentCustomer.getCustomer(), CurrentCustomer.getTableNumber());
+		//print("hihi  "+this.state);
+
+		try {
+			atTable.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		busy=true;
+		this.state=AgentState.GetOrder;
+		//print("hihihi  "+this.state);
+
+		CurrentCustomer.setState(CustState.Ordered);
+		//print("hi5  "+this.state + "   " + busy);
+
+		CurrentCustomer.getCustomer().msgHereForNewOrder();
+		print("Here for a new order");
 	}
 	
 	public void GetCustomerOrder() {
@@ -414,7 +537,7 @@ public class WaiterAgent extends Agent {
 		}	
 		busy=true;
 		this.state=AgentState.CleanTable;
-		host.msgLeavingTable(CurrentCustomer.getCustomer());
+		host.msgLeavingTable(CurrentCustomer.getCustomer(), this);
 		CurrentCustomer.setState(CustState.Gone);
 		print("Table clean");
 		waiterGui.DoLeaveCustomer();

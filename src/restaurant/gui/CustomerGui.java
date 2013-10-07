@@ -51,14 +51,14 @@ public class CustomerGui implements Gui{
 
 	public void updatePosition() {
 		if (xPos < xDestination)
-			xPos++;
+			xPos = xPos +2;
 		else if (xPos > xDestination)
-			xPos--;
+			xPos=xPos-2;
 
 		if (yPos < yDestination)
-			yPos++;
+			yPos = yPos+2;
 		else if (yPos > yDestination)
-			yPos--;
+			yPos=yPos-2;
 
 		if (xPos == xDestination && yPos == yDestination) {
 			if (command==Command.GoToSeat) agent.msgAnimationFinishedGoToSeat();

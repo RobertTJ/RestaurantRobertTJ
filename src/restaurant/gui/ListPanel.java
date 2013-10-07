@@ -20,14 +20,20 @@ public class ListPanel extends JPanel implements ActionListener {
     public JScrollPane pane =
             new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    public JScrollPane Wpane =
+            new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     private JPanel view = new JPanel();
+    private JPanel viewWaiters = new JPanel();
     private List<JButton> list = new ArrayList<JButton>();
+    private List<JButton> waiters = new ArrayList<JButton>();
     private JButton addPersonB = new JButton("Add Customer");
     private JButton addWaiterB = new JButton("Add Waiter");
     private JButton Pause = new JButton("Pause");
     private JButton Resume = new JButton("Resume");
     
     private JCheckBox initHungry = new JCheckBox("Hungry?");
+    //private JCheckBox BreakTime = new JCheckBox("Break?");
 
     private RestaurantPanel restPanel;
     private String type;
@@ -35,6 +41,7 @@ public class ListPanel extends JPanel implements ActionListener {
     private JPanel entryline;
     private JPanel buttonline;
     List<JCheckBox> stateCB2 = new ArrayList<JCheckBox>();
+    List<JCheckBox> WBreaks = new ArrayList<JCheckBox>();
     private int k=0;
     private int textwidth = 200;
     private int textheight = 24;
@@ -90,7 +97,11 @@ public class ListPanel extends JPanel implements ActionListener {
         
         view.setLayout(new GridLayout(rows,columns));
         pane.setViewportView(view);
+        viewWaiters.setLayout(new GridLayout(rows,columns));
+        Wpane.setViewportView(viewWaiters);
         add(pane);
+        add(new JLabel("<html><pre> <u>" + "Waiters" + "</u><br></pre></html>"));
+        add(Wpane);
     }
 
     /**
@@ -123,13 +134,30 @@ public class ListPanel extends JPanel implements ActionListener {
         else {
         	for  (int i = 0; i < list.size(); i++) {
      		   JCheckBox tempalso = new JCheckBox();
-     		   tempalso=stateCB2.get(i);
      		  
-               if (e.getSource() == tempalso) { 
-            	   restPanel.actionTime(i);
-                   tempalso.setEnabled(false);                 
-                   }
-               }
+     		   tempalso=stateCB2.get(i);
+     		   
+     		  if (e.getSource() == tempalso) { 
+           	   restPanel.actionTime(i);
+                  tempalso.setEnabled(false);                 
+                  }
+              }
+        	for  (int j = 0; j < waiters.size(); j++) {
+        		//boolean done =false;
+        		 JCheckBox waitertemp = new JCheckBox();
+         		   waitertemp=WBreaks.get(j);
+         		  if (e.getSource() == waitertemp && waitertemp.isSelected()==true) {
+         			  waitertemp.setEnabled(false); 
+         			  restPanel.BreakTime(j);
+        			   //done=true;
+        		   }
+         		  else if (e.getSource() == waitertemp && waitertemp.isSelected()==false) {
+      			   restPanel.BreakTimeOver(j);
+      			   waitertemp.setEnabled(true);
+         		  }
+     		   }
+     		   
+             
         }
         
         
@@ -145,6 +173,19 @@ public class ListPanel extends JPanel implements ActionListener {
       */
     }
     
+    public void CantBreakNow(int i) {
+    	WBreaks.get(i).setSelected(false);
+    	WBreaks.get(i).setEnabled(true);
+    	//temp.setEnabled(true);
+    	//temp.setSelected(false);
+    }
+    
+    public void WOnBreak(int i) {
+    	JCheckBox temp = new JCheckBox();
+    	temp = WBreaks.get(i);
+    	temp.setEnabled(true);
+    	temp.setSelected(true);
+    }
     
     public void enable(int i) {
     	JCheckBox temp=new JCheckBox();
@@ -199,6 +240,25 @@ public class ListPanel extends JPanel implements ActionListener {
     
     public void addWaiter(String name) {
         if (name != null) {
+        	JButton button = new JButton(name);
+            button.setBackground(Color.white);
+
+            Dimension paneSize = pane.getSize();
+            Dimension buttonSize = new Dimension(paneSize.width - oneten,
+                    (int) (paneSize.height / seven));
+            button.setPreferredSize(buttonSize);
+            button.setMinimumSize(buttonSize);
+            button.setMaximumSize(buttonSize);
+            button.addActionListener(this);
+            waiters.add(button);
+            viewWaiters.add(button);
+            
+            JCheckBox checkit = new JCheckBox("Break Time?"); 
+            checkit.setVisible(true);
+            checkit.addActionListener(this);
+            
+            WBreaks.add(checkit);
+            viewWaiters.add(checkit);
 
             restPanel.addPerson("Waiters", name);//puts waiter on list
             
