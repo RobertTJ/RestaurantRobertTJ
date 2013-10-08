@@ -112,24 +112,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
      *
      * @param person customer (or waiter) object
      */
-   /* public void updateInfoPanel(Object person) {
-    	
-    	stateCB.setVisible(true);
-        currentPerson = person;
-
-        if (person instanceof CustomerAgent) {
-            CustomerAgent customer = (CustomerAgent) person;
-            stateCB.setText("Hungry?");
-          //Should checkmark be there? 
-            stateCB.setSelected(customer.getGui().isHungry());
-          //Is customer hungry? Hack. Should ask customerGui
-            stateCB.setEnabled(!customer.getGui().isHungry());
-          // Hack. Should ask customerGui
-            infoLabel.setText(
-               "<html><pre>     Name: " + customer.getName() + " </pre></html>");
-        }
-        infoPanel.validate();
-    }*/
+   
     /**
      * Action listener method that reacts to the checkbox being clicked;
      * If it's the customer's checkbox, it will make him hungry
