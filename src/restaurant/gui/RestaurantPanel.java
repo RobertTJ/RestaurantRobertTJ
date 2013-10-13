@@ -2,6 +2,7 @@ package restaurant.gui;
 
 import restaurant.CustomerAgent;
 import restaurant.HostAgent;
+import restaurant.MarketAgent;
 import restaurant.WaiterAgent;
 import restaurant.CookAgent;
 
@@ -29,6 +30,11 @@ public class RestaurantPanel extends JPanel {
    // private WaiterGui waiterGui2 = new WaiterGui(waiter);
     
     private CookAgent cook = new CookAgent("Tim");
+    private MarketAgent market1 = new MarketAgent("Bob");
+    private MarketAgent market2 = new MarketAgent("Bobby");
+    private MarketAgent market3 = new MarketAgent("Bobert");
+
+    
 
     private Vector<CustomerAgent> customers = new Vector<CustomerAgent>();
     private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
@@ -73,6 +79,19 @@ public class RestaurantPanel extends JPanel {
         //waiter2.startThread();
        
         cook.startThread();
+        market1.startThread();
+        market1.SetCook(cook);
+        
+        market2.startThread();
+        market2.SetCook(cook);
+
+        market3.startThread();
+        market3.SetCook(cook);
+
+        cook.AddMarket(market1);
+        cook.AddMarket(market2);
+        cook.AddMarket(market3);
+        
         
         //gui.animationPanel.addGui(hostGui);
         host.startThread();

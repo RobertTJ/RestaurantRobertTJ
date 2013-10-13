@@ -22,6 +22,7 @@ public class CookAgent extends Agent {
 	private String name;
 	//List<Order> orders= new <ListArray>Order();
 	HostAgent host;
+
 	
 	//public HostGui hostGui = null;
 	
@@ -44,7 +45,23 @@ public class CookAgent extends Agent {
 	public List<WaiterAgent> Waiters
 	= new ArrayList<WaiterAgent>();
 	
+	public List<MarketAgent> Markets
+	= new ArrayList<MarketAgent>();
+	public List<Boolean> OutOfBeef = new ArrayList<Boolean>();
+	public List<Boolean> OutOfChicken = new ArrayList<Boolean>();
+	public List<Boolean> OutOfPizza = new ArrayList<Boolean>();
+	public List<Boolean> OutOfSalad = new ArrayList<Boolean>();
+
+	
 	Inventory inventory = new Inventory();
+	
+	public void AddMarket(MarketAgent m) {
+		Markets.add(m);
+		OutOfBeef.add(false); //hack, get info from markets
+		OutOfChicken.add(false);
+		OutOfPizza.add(false);
+		OutOfSalad.add(false);
+	}
 	
 	public void SetHost(HostAgent h) {
 		this.host=h;
@@ -64,17 +81,38 @@ public class CookAgent extends Agent {
 		allOrders.add(new Order(waiter,table, order));
 		stateChanged();
 	}
+	
+	public void msgOrderFullfilled(String food, int amount) {
+		inventory.AddMore(food, amount);
+		stateChanged();
+	}
+	
+	public void msgCanNotFullfillOrder(String food, int amount, int available, MarketAgent m) {
+		if (available > 0) inventory.AddMore(food, available);
+		for (int i = 0; i < Markets.size(); i++) {
+			if (m == Markets.get(i)) {
+				if (food == "Steak") {
+					OutOfBeef.set(i, true);
+				}
+				else if (food == "Chicken") {
+					OutOfChicken.set(i, true);
+				}
+				else if (food == "Pizza") {
+					OutOfPizza.set(i, true);
+				}
+				else if (food == "Steak") {
+					OutOfSalad.set(i, true);
+				}
+			}
+		}
+	}
 
 	
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
 	protected boolean pickAndExecuteAnAction() {
-		/* Think of this next rule as:
-            Does there exist a table and customer,
-            so that table is unoccupied and customer is waiting.
-            If so seat him at the table.
-		 */
+	
 		
 		for (Order order : allOrders){
 			if(order.state==CookState.done) {
@@ -89,7 +127,7 @@ public class CookAgent extends Agent {
 			if(order.state==CookState.pending && inventory.GetAmountOf(order.order.getChoice()) == 0) {
 				print("Out of " + order.order.getChoice());
 				order.setStateOutofFood();
-				order.getWaiter().msgGetNewOrder(order.getCustomer());
+				GetMoreFood(order);
 				
 				return true;
 			}
@@ -105,20 +143,43 @@ public class CookAgent extends Agent {
 		}
 
 		return false;
-		//we have tried all our rules and found
-		//nothing to do. So return false to main loop of abstract agent
-		//and wait.
 	}
 
 	// Actions
-	public void callWaiter(Order o) {
+	private void GetMoreFood(Order o) {
+		o.getWaiter().msgGetNewOrder(o.getCustomer());
+		
+		for (int i=0;i<Markets.size();i++){
+			if(o.getOrder().getChoice() == "Steak" && OutOfBeef.get(i)==false) {
+				Markets.get(i).msgNewOrders(o.getOrder().getChoice(), 3);	
+				break;
+			}
+			else if(o.getOrder().getChoice() == "Chicken" && OutOfChicken.get(i)==false) {
+				Markets.get(i).msgNewOrders(o.getOrder().getChoice(), 3);	
+				break;
+			}
+			else if(o.getOrder().getChoice() == "Pizza" && OutOfPizza.get(i)==false) {
+				Markets.get(i).msgNewOrders(o.getOrder().getChoice(), 3);	
+				break;
+			}
+			else if(o.getOrder().getChoice() == "Salad" && OutOfSalad.get(i)==false) {
+				Markets.get(i).msgNewOrders(o.getOrder().getChoice(), 3);	
+				break;
+			}
+			
+		}
+		
+		stateChanged();
+	}
+	
+	private void callWaiter(Order o) {
 		o.getWaiter().msgOrderReady(o.order.getChoice(), o.getTableNumber());
 		stateChanged();
 	}
 	
-	public void Cook(final Order o) {	
+	private void Cook(final Order o) {	
 		inventory.CookOneOf(o.order.getChoice());
-		print("There are " + inventory.GetAmountOf(o.order.getChoice()) + o.order.getChoice() + "left now");
+		print("There are " + inventory.GetAmountOf(o.order.getChoice()) +" " + o.order.getChoice() + "left now");
 
 		print("Started cooking " + o.order.getChoice());
 		timer.schedule(new TimerTask() {
@@ -134,6 +195,7 @@ public class CookAgent extends Agent {
 		o.order.cooktime);
 	}
 
+	//  Classes
 	
 	private class Food {
 		String choice;
