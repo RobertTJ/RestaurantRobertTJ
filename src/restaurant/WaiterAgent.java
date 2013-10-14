@@ -86,7 +86,6 @@ public class WaiterAgent extends Agent {
 		//print("Get here?");
 		for (int i=0;i<myCustomers.size();i++) {
 			if (myCustomers.get(i).getCustomer()==c) {
-				//myCustomers.remove(i);
 				myCustomers.get(i).setState(CustState.LeftEarly);
 				break;
 			}
