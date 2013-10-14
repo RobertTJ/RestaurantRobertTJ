@@ -37,6 +37,8 @@ public class CashierAgent extends Agent {
 	public String getMaitreDName() {
 		return name;
 	}
+	
+	//public enum PayState {payed, owed, other
 
 	public String getName() {
 		return name;
@@ -57,12 +59,8 @@ public class CashierAgent extends Agent {
 	}
 	
 	public void msgPayingMyBill(CustomerAgent c) {
-		print (c + " has payed his bill");
-		for (MyCustomers cust : Customers) {
-			if (cust.getCustomer() == c) {
-				cust.setOwed(false);
-			}
-		}
+		print (c + " has payed");
+		
 	}
 	
 	/**
@@ -92,6 +90,11 @@ public class CashierAgent extends Agent {
 		print("Here is the check for " + CurrentCustomer.getCustomer());
 		Check ThisCheck = new Check(CurrentCustomer.GetBill());
 		CurrentCustomer.getWaiter().msgHereIsCheck(CurrentCustomer.getCustomer(), ThisCheck);
+		for (int i=0;i<Customers.size();i++) {
+			if (Customers.get(i) == CurrentCustomer) {
+				Customers.remove(i);
+			}
+		}
 		stateChanged();
 	}
 	

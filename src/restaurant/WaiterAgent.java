@@ -24,12 +24,12 @@ public class WaiterAgent extends Agent {
 	public AgentState state = AgentState.DoingNothing;//The start state
 	
 	public enum Event
-	{GoToCashier, GotCheck, NewCustomerToSeat, DoneSeating, customerReady, GotOrder, FoodReady, customerDone, OutOfFood, WantABreak, TakeABreak};
+	{HeLeft, GoToCashier, GotCheck, NewCustomerToSeat, DoneSeating, customerReady, GotOrder, FoodReady, customerDone, OutOfFood, WantABreak, TakeABreak};
 	
 	private Event event = Event.DoneSeating;
 	private Event currentEvent = Event.DoneSeating;
 	
-	public enum CustState {other, NeedCheck, BringCheck, NewOrderNeeded, Seating, Seated, ReadyToOrder, Ordered, WaitingForFood, OrderOut, Eating, Done, Leaving, Gone};
+	public enum CustState {LeftEarly, other, NeedCheck, BringCheck, NewOrderNeeded, Seating, Seated, ReadyToOrder, Ordered, WaitingForFood, OrderOut, Eating, Done, Leaving, Gone};
 
 	public List<MyCustomers> myCustomers
 	= new ArrayList<MyCustomers>();
@@ -83,12 +83,17 @@ public class WaiterAgent extends Agent {
 	// Messages
 	
 	public void msgOutOfHere(CustomerAgent c) {
-		for (MyCustomers myCustomer : myCustomers) {
-			if (myCustomer.getCustomer() == c) {
-				myCustomer.setState(CustState.Gone);
-				myCustomers.remove(myCustomer);
+		//print("Get here?");
+		for (int i=0;i<myCustomers.size();i++) {
+			if (myCustomers.get(i).getCustomer()==c) {
+				//myCustomers.remove(i);
+				myCustomers.get(i).setState(CustState.LeftEarly);
+				break;
 			}
 		}
+		state=AgentState.DoingNothing;
+		event=Event.HeLeft;
+		allEvents.add(event);
 		stateChanged();
 	}
 	
@@ -232,9 +237,18 @@ public class WaiterAgent extends Agent {
 		
 		
 		//if (currentEvent)
-		
 		for (Event pendingEvents : allEvents) {
 			if (pendingEvents == Event.TakeABreak) {
+				//print("in here execution?");
+				busy=true;
+				currentEvent = pendingEvents;
+				//allEvents.remove(pendingEvents);
+				break;
+			}
+		}
+		
+		for (Event pendingEvents : allEvents) {
+			if (pendingEvents == Event.HeLeft) {
 				//print("in here execution?");
 				busy=true;
 				currentEvent = pendingEvents;
@@ -336,7 +350,13 @@ public class WaiterAgent extends Agent {
 		}
 		
 		
-
+					if (currentEvent==Event.HeLeft) {
+						//print("Here? Not yet");
+						allEvents.remove(currentEvent);
+						PrepareTableEarly();
+						currentEvent=null;
+						return true;
+					}
 					if (currentEvent==Event.FoodReady) {
 						this.state = AgentState.ServeFood;
 						for (MyCustomers myCustomer : myCustomers) {
@@ -627,9 +647,38 @@ public class WaiterAgent extends Agent {
 
 	public void PrepareTable() {
 		print("Table empty");
-		for (MyCustomers myCustomer : myCustomers) {
-			if (myCustomer.getState()==CustState.Done) {
-				CurrentCustomer = myCustomer;
+		for (int i=0;i<myCustomers.size();i++) {
+			if (myCustomers.get(i).getState()==CustState.Done) {
+				CurrentCustomer = myCustomers.get(i);
+				myCustomers.remove(i);
+				break;
+			}
+		}
+		CurrentCustomer.setState(CustState.Leaving);
+		waiterGui.DoGoToTable(CurrentCustomer.getCustomer(), CurrentCustomer.getTableNumber());
+		try {
+			atTable.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		busy=true;
+		this.state=AgentState.CleanTable;
+		host.msgLeavingTable(CurrentCustomer.getCustomer(), this);
+		CurrentCustomer.setState(CustState.Gone);
+		
+		myCustomers.remove(CurrentCustomer);
+		 
+		print("Table clean");
+		waiterGui.DoLeaveCustomer();
+	  }
+	
+	public void PrepareTableEarly() {
+		print("Table empty");
+		for (int i=0;i<myCustomers.size();i++) {
+			if (myCustomers.get(i).getState()==CustState.LeftEarly) {
+				CurrentCustomer = myCustomers.get(i);
+				myCustomers.remove(i);
 				break;
 			}
 		}
@@ -684,19 +733,19 @@ public class WaiterAgent extends Agent {
 			else return costFour;
 		}
 		
-		String ChooseOne() {
+		String ChoosePizza() {
 			return optionOne;
 		}
 		
-		String ChooseTwo() {
+		String ChooseSteak() {
 			return optionTwo;
 		}
 		
-		String ChooseThree() {
+		String ChooseSalad() {
 			return optionThree;
 		}
 		
-		String ChooseFour() {
+		String ChooseChicken() {
 			return optionFour;
 		}
 	}

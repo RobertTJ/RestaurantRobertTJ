@@ -39,6 +39,7 @@ public class CookAgent extends Agent {
 		inventory.AddMore ("Pizza", 1);
 		inventory.AddMore ("Steak", 1);
 		inventory.AddMore ("Salad", 1);
+		//inventory.AddMore ("Chicken",1);
 	}
 
 	public List<Order> allOrders

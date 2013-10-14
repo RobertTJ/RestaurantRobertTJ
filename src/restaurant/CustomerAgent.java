@@ -47,7 +47,7 @@ public class CustomerAgent extends Agent {
 	public CustomerAgent(String name){
 		super();
 		this.name = name;
-		Wallet = 30.00;
+		Wallet = 3.00;
 	}
 
 	/**
@@ -200,6 +200,7 @@ public class CustomerAgent extends Agent {
 			host.msgIWontWait(this);
 		}
 		customerGui.DoExitRestaurant();
+		stateChanged();
 	}
 	
 	private void AskForCheck() {
@@ -254,56 +255,101 @@ public class CustomerAgent extends Agent {
 	private void OrderNewFood() {
 		
 		Random generator = new Random();
-		select++;
-		if (select == 4) {
-			select = 0;
+		if ( Wallet>= 9){
+			if (select == 0) {
+				select ++;
+			}
+			else select--;
+			
+			if (select == 0) {
+				order = menu.ChooseChicken();
+			}
+			else if (select == 1) {
+				order = menu.ChoosePizza();
+			}
+			else if (select == 2) {
+				order = menu.ChooseChicken();
+			}
+			else {
+				order = menu.ChooseSteak();
+			}
+			print("I want " + order);
+			waiter.msgOrderFood(this, this.getOrder());
+			//print("in cust execution?");
+			stateChanged();
 		}
-				
-		//print("Randomed " + select);
 		
-		if (select == 0) {
-			order = menu.ChooseOne();
-		}
-		else if (select == 1) {
-			order = menu.ChooseTwo();
-		}
-		else if (select == 2) {
-			order = menu.ChooseThree();
-		}
 		else {
-			order = menu.ChooseFour();
+			print("I can't afford anything");
+			this.Leave();	
 		}
-		print("I want " + order + " now");
-		waiter.msgOrderFood(this, this.getOrder());
-		//print("in cust execution?");
-		event=null;
-		stateChanged();
 	}
 	
 	private void OrderFood() {
-		print("Check me");
+		//print("Check me");
 		Random generator = new Random();
-		select = generator.nextInt(4);
-		select = 0;
-				
-		//print("Randomed " + select);
 		
-		if (select == 0) {
-			order = menu.ChooseOne();
+		if ( Wallet>= 6){
+			if (Wallet>=16) {
+				select = generator.nextInt(4);
+			}
+			else if (Wallet>=11) {
+				select = generator.nextInt(3);
+			}
+			else if (Wallet>=9) {
+				select = generator.nextInt(2);
+			}
+			else if (Wallet>=6) {
+				select = 0;
+			}
+			
+			if (select == 0) {
+				order = menu.ChooseChicken();
+			}
+			else if (select == 1) {
+				order = menu.ChoosePizza();
+			}
+			else if (select == 2) {
+				order = menu.ChooseChicken();
+			}
+			else {
+				order = menu.ChooseSteak();
+			}
+			print("I want " + order);
+			waiter.msgOrderFood(this, this.getOrder());
+			//print("in cust execution?");
+			stateChanged();
 		}
-		else if (select == 1) {
-			order = menu.ChooseTwo();
-		}
-		else if (select == 2) {
-			order = menu.ChooseThree();
-		}
+		
 		else {
-			order = menu.ChooseFour();
+			select = generator.nextInt(2);
+			if (select == 0) {
+				print("I can't afford anything");
+				//stateChanged();
+				this.Leave();	
+			}
+			else {
+				print("I can't afford anything.  Guess I'll dine and dash.");
+				
+				select = generator.nextInt(4);
+				
+				if (select == 0) {
+					order = menu.ChooseChicken();
+				}
+				else if (select == 1) {
+					order = menu.ChoosePizza();
+				}
+				else if (select == 2) {
+					order = menu.ChooseChicken();
+				}
+				else {
+					order = menu.ChooseSteak();
+				}
+				print("I want " + order);
+				waiter.msgOrderFood(this, this.getOrder());
+				stateChanged();
+			}
 		}
-		print("I want " + order);
-		waiter.msgOrderFood(this, this.getOrder());
-		//print("in cust execution?");
-		stateChanged();
 	}
 
 	private void EatFood() {
