@@ -23,7 +23,7 @@ public class CookAgent extends Agent {
 	//List<Order> orders= new <ListArray>Order();
 	HostAgent host;
 	
-	boolean PayingAttention = false;
+	boolean PayingAttention = true;
 
 	
 	//public HostGui hostGui = null;
@@ -35,11 +35,11 @@ public class CookAgent extends Agent {
 		super();
 
 		this.name = name;
-		PayingAttention = false;
+		PayingAttention = true;
 		inventory.AddMore ("Pizza", 1);
 		inventory.AddMore ("Steak", 1);
 		inventory.AddMore ("Salad", 1);
-		//inventory.AddMore ("Chicken",1);
+		inventory.AddMore ("Chicken",1);
 	}
 
 	public List<Order> allOrders
@@ -54,6 +54,10 @@ public class CookAgent extends Agent {
 	public List<Boolean> OutOfChicken = new ArrayList<Boolean>();
 	public List<Boolean> OutOfPizza = new ArrayList<Boolean>();
 	public List<Boolean> OutOfSalad = new ArrayList<Boolean>();
+	boolean orderedSteak=false;
+	boolean orderedChicken=false;
+	boolean orderedPizza=false;
+	boolean orderedSalad=false;
 
 	
 	Inventory inventory = new Inventory();
@@ -86,25 +90,57 @@ public class CookAgent extends Agent {
 	}
 	
 	public void msgOrderFullfilled(String food, int amount) {
+		
+		if (food == "Steak") {
+			orderedSteak=false;
+		}
+		else if (food == "Chicken") {
+			orderedChicken=false;
+		}
+		else if (food == "Pizza") {
+			orderedPizza=false;
+		}
+		else if (food == "Steak") {
+			orderedSalad=false;
+		}
+		
 		inventory.AddMore(food, amount);
 		stateChanged();
 	}
 	
 	public void msgCanNotFullfillOrder(String food, int amount, int available, MarketAgent m) {
 		if (available > 0) inventory.AddMore(food, available);
+
+		if (food == "Steak") {
+			orderedSteak=false;
+		}
+		else if (food == "Chicken") {
+			orderedChicken=false;
+		}
+		else if (food == "Pizza") {
+			orderedPizza=false;
+		}
+		else if (food == "Steak") {
+			orderedSalad=false;
+		}
+		
 		for (int i = 0; i < Markets.size(); i++) {
 			if (m == Markets.get(i)) {
 				if (food == "Steak") {
 					OutOfBeef.set(i, true);
+					break;
 				}
 				else if (food == "Chicken") {
 					OutOfChicken.set(i, true);
+					break;
 				}
 				else if (food == "Pizza") {
 					OutOfPizza.set(i, true);
+					break;
 				}
 				else if (food == "Steak") {
 					OutOfSalad.set(i, true);
+					break;
 				}
 			}
 		}
@@ -127,21 +163,21 @@ public class CookAgent extends Agent {
 		}
 		
 		if (PayingAttention==true && Markets.isEmpty()==false) {
-			if (inventory.GetAmountOf("Steak") < 1) {
+			if (inventory.GetAmountOf("Steak") <= 1 && orderedSteak==false) {
 				Restock("Steak");
-				//return true;
+				return true;
 			}
-			if (inventory.GetAmountOf("Chicken") < 1) {
+			if (inventory.GetAmountOf("Chicken") <= 1 && orderedChicken==false) {
 				Restock("Chicken");
-				//return true;
+				return true;
 			}
-			if (inventory.GetAmountOf("Pizza") < 1) {
+			if (inventory.GetAmountOf("Pizza") <= 1 && orderedPizza==false) {
 				Restock("Pizza");
-				//return true;
+				return true;
 			}
-			if (inventory.GetAmountOf("Salad") < 1) {
+			if (inventory.GetAmountOf("Salad") <= 1 && orderedSalad==false) {
 				Restock("Salad");
-				//return true;
+				return true;
 			}
 		}
 		
@@ -173,19 +209,23 @@ public class CookAgent extends Agent {
 		o.getWaiter().msgGetNewOrder(o.getCustomer());
 		
 		for (int i=0;i<Markets.size();i++){
-			if(o.getOrder().getChoice() == "Steak" && OutOfBeef.get(i)==false) {
+			if(o.getOrder().getChoice() == "Steak" && OutOfBeef.get(i)==false && orderedSteak==false) {
+				orderedSteak=true;
 				Markets.get(i).msgNewOrders(o.getOrder().getChoice(), 3);	
 				break;
 			}
-			else if(o.getOrder().getChoice() == "Chicken" && OutOfChicken.get(i)==false) {
+			else if(o.getOrder().getChoice() == "Chicken" && OutOfChicken.get(i)==false && orderedChicken==false) {
+				orderedChicken=true;
 				Markets.get(i).msgNewOrders(o.getOrder().getChoice(), 3);	
 				break;
 			}
-			else if(o.getOrder().getChoice() == "Pizza" && OutOfPizza.get(i)==false) {
+			else if(o.getOrder().getChoice() == "Pizza" && OutOfPizza.get(i)==false && orderedPizza==false) {
+				orderedPizza=true;
 				Markets.get(i).msgNewOrders(o.getOrder().getChoice(), 3);	
 				break;
 			}
-			else if(o.getOrder().getChoice() == "Salad" && OutOfSalad.get(i)==false) {
+			else if(o.getOrder().getChoice() == "Salad" && OutOfSalad.get(i)==false && orderedSalad==false) {
+				orderedSalad=true;
 				Markets.get(i).msgNewOrders(o.getOrder().getChoice(), 3);	
 				break;
 			}
@@ -198,20 +238,24 @@ public class CookAgent extends Agent {
 	private void Restock(String type) {
 		
 		for (int i=0;i<Markets.size();i++){
-			if(type == "Steak" && OutOfBeef.get(i)==false) {
+			if(type == "Steak" && OutOfBeef.get(i)==false && orderedSteak==false) {
 				Markets.get(i).msgNewOrders(type, 3);	
+				orderedSteak=true;
 				break;
 			}
-			else if(type == "Chicken" && OutOfChicken.get(i)==false) {
+			else if(type == "Chicken" && OutOfChicken.get(i)==false && orderedChicken==false) {
 				Markets.get(i).msgNewOrders(type, 3);	
+				orderedChicken=true;
 				break;
 			}
-			else if(type== "Pizza" && OutOfPizza.get(i)==false) {
+			else if(type== "Pizza" && OutOfPizza.get(i)==false && orderedPizza==false) {
 				Markets.get(i).msgNewOrders(type, 3);	
+				orderedPizza=true;
 				break;
 			}
-			else if(type == "Salad" && OutOfSalad.get(i)==false) {
-				Markets.get(i).msgNewOrders(type, 3);	
+			else if(type == "Salad" && OutOfSalad.get(i)==false && orderedSalad==false) {
+				Markets.get(i).msgNewOrders(type, 3);
+				orderedSalad=true;
 				break;
 			}
 			

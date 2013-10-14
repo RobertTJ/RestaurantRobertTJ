@@ -130,6 +130,7 @@ public class HostAgent extends Agent {
 	}
 	
 	public void msgIWontWait(CustomerAgent c) {
+		print(c + " does not want to wait and has left");
 		waitingCustomers.remove(c);
 		stateChanged();
 	}

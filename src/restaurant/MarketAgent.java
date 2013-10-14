@@ -68,10 +68,10 @@ public class MarketAgent extends Agent {
 		
 		for (Order order : allOrders){
 			if (order.getAmount() < inventory.GetAmountOf(order.getOrder().getChoice())) {
-				print("order:" + order.getAmount() + " vs " + inventory.GetAmountOf(order.getOrder().getChoice()));
+				//print("order:" + order.getAmount() + " vs " + inventory.GetAmountOf(order.getOrder().getChoice()));
 
 				FullfillOrder(order);
-				print("order:" + order.getAmount() + " vs " + inventory.GetAmountOf(order.getOrder().getChoice()));
+				//print("order:" + order.getAmount() + " vs " + inventory.GetAmountOf(order.getOrder().getChoice()));
 				return true;
 			}
 

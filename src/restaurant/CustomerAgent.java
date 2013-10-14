@@ -199,6 +199,7 @@ public class CustomerAgent extends Agent {
 		else {
 			host.msgIWontWait(this);
 		}
+		state=AgentState.DoingNothing;
 		customerGui.DoExitRestaurant();
 		stateChanged();
 	}
@@ -255,7 +256,7 @@ public class CustomerAgent extends Agent {
 	private void OrderNewFood() {
 		
 		Random generator = new Random();
-		if ( Wallet>= 9){
+		if ( Wallet>= 9 || Wallet<6){
 			if (select == 0) {
 				select ++;
 			}
@@ -279,7 +280,7 @@ public class CustomerAgent extends Agent {
 			stateChanged();
 		}
 		
-		else {
+		else if (Wallet>=6 && Wallet<9) {
 			print("I can't afford anything");
 			this.Leave();	
 		}
