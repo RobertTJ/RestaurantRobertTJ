@@ -22,6 +22,8 @@ public class CookAgent extends Agent {
 	private String name;
 	//List<Order> orders= new <ListArray>Order();
 	HostAgent host;
+	
+	boolean PayingAttention = false;
 
 	
 	//public HostGui hostGui = null;
@@ -33,8 +35,8 @@ public class CookAgent extends Agent {
 		super();
 
 		this.name = name;
-		
-		inventory.AddMore ("Pizza", 0);
+		PayingAttention = false;
+		inventory.AddMore ("Pizza", 1);
 		inventory.AddMore ("Steak", 1);
 		inventory.AddMore ("Salad", 1);
 	}
@@ -123,6 +125,25 @@ public class CookAgent extends Agent {
 			}
 		}
 		
+		if (PayingAttention==true && Markets.isEmpty()==false) {
+			if (inventory.GetAmountOf("Steak") < 1) {
+				Restock("Steak");
+				//return true;
+			}
+			if (inventory.GetAmountOf("Chicken") < 1) {
+				Restock("Chicken");
+				//return true;
+			}
+			if (inventory.GetAmountOf("Pizza") < 1) {
+				Restock("Pizza");
+				//return true;
+			}
+			if (inventory.GetAmountOf("Salad") < 1) {
+				Restock("Salad");
+				//return true;
+			}
+		}
+		
 		for (Order order : allOrders){
 			if(order.state==CookState.pending && inventory.GetAmountOf(order.order.getChoice()) == 0) {
 				print("Out of " + order.order.getChoice());
@@ -137,6 +158,7 @@ public class CookAgent extends Agent {
 			if(order.state==CookState.pending && inventory.GetAmountOf(order.order.getChoice()) > 0) {
 				order.setStateCooking();
 				Cook(order);
+				
 				
 				return true;
 			}
@@ -172,6 +194,31 @@ public class CookAgent extends Agent {
 		stateChanged();
 	}
 	
+	private void Restock(String type) {
+		
+		for (int i=0;i<Markets.size();i++){
+			if(type == "Steak" && OutOfBeef.get(i)==false) {
+				Markets.get(i).msgNewOrders(type, 3);	
+				break;
+			}
+			else if(type == "Chicken" && OutOfChicken.get(i)==false) {
+				Markets.get(i).msgNewOrders(type, 3);	
+				break;
+			}
+			else if(type== "Pizza" && OutOfPizza.get(i)==false) {
+				Markets.get(i).msgNewOrders(type, 3);	
+				break;
+			}
+			else if(type == "Salad" && OutOfSalad.get(i)==false) {
+				Markets.get(i).msgNewOrders(type, 3);	
+				break;
+			}
+			
+		}
+		
+		stateChanged();
+	}
+	
 	private void callWaiter(Order o) {
 		o.getWaiter().msgOrderReady(o.order.getChoice(), o.getTableNumber());
 		stateChanged();
@@ -180,7 +227,11 @@ public class CookAgent extends Agent {
 	private void Cook(final Order o) {	
 		inventory.CookOneOf(o.order.getChoice());
 		print("There are " + inventory.GetAmountOf(o.order.getChoice()) +" " + o.order.getChoice() + "left now");
-
+		
+		if (inventory.GetAmountOf(o.order.getChoice())==0) {
+			Restock(o.getOrder().getChoice());
+		}
+		
 		print("Started cooking " + o.order.getChoice());
 		timer.schedule(new TimerTask() {
 			Object cook = 1;
@@ -193,8 +244,15 @@ public class CookAgent extends Agent {
 			}
 		},
 		o.order.cooktime);
+		
 	}
 
+	//Extra
+	
+	public void SetPayingAttention(boolean Attentive) {
+		PayingAttention = Attentive;
+	}
+	
 	//  Classes
 	
 	private class Food {

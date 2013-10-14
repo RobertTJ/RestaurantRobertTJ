@@ -1,5 +1,6 @@
 package restaurant;
 
+import restaurant.CashierAgent.Check;
 import restaurant.WaiterAgent.Menu;
 import restaurant.gui.CustomerGui;
 import restaurant.gui.RestaurantGui;
@@ -19,19 +20,22 @@ public class CustomerAgent extends Agent {
 	Timer timer = new Timer();
 	private CustomerGui customerGui;
 	private Menu menu;
+	private double Wallet;
+	private double bill=0.00;
 
 	// agent correspondents
 	private HostAgent host;
-	private WaiterAgent waiter;
+	private WaiterAgent waiter = null;
+	private CashierAgent cashier;
 	int select;
 
 	//    private boolean isHungry = false; //hack for gui
 	public enum AgentState
-	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, Ordered, WaitingForFood, Eating, DoneEating, Leaving};
+	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, Ordered, WaitingForFood, Eating, DoneEating, WaitingForCheck, Leaving};
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	public enum AgentEvent 
-	{none, gotHungry, followWaiter, seated, beingHelped, beingHelpedAgain, gotFood, doneEating, doneLeaving};
+	{LeaveEarly, none, gotHungry, followWaiter, seated, beingHelped, beingHelpedAgain, gotFood, doneEating, GotCheck, doneLeaving};
 	AgentEvent event = AgentEvent.none;
 
 	/**
@@ -43,13 +47,19 @@ public class CustomerAgent extends Agent {
 	public CustomerAgent(String name){
 		super();
 		this.name = name;
+		Wallet = 30.00;
 	}
 
 	/**
 	 * hack to establish connection to Host agent.
 	 */
+	
 	public void setHost(HostAgent host) {
 		this.host = host;
+	}
+	
+	public void SetCashier(CashierAgent a) {
+		this.cashier = a;
 	}
 	
 	public void SetWaiter(WaiterAgent w) {
@@ -64,6 +74,21 @@ public class CustomerAgent extends Agent {
 	public void gotHungry() {//from animation
 		print("I'm hungry");
 		event = AgentEvent.gotHungry;
+		stateChanged();
+	}
+	
+	public void msgRestaurantFull() {
+		Random generator = new Random();
+		select = generator.nextInt(2);
+		if(select == 1) {
+			event = AgentEvent.LeaveEarly;
+			stateChanged();
+		}
+	}
+	
+	public void msgHereIsYourBill(Check k) {
+		if (k!= null) bill = k.GetBill();
+		event = AgentEvent.GotCheck;
 		stateChanged();
 	}
 	
@@ -108,6 +133,11 @@ public class CustomerAgent extends Agent {
 	protected boolean pickAndExecuteAnAction() {
 		//	CustomerAgent is a finite state machine
 
+		if (event == AgentEvent.LeaveEarly) {
+			state = AgentState.DoingNothing;
+			Leave();
+		}
+		
 		if (state == AgentState.DoingNothing && event == AgentEvent.gotHungry ){
 			state = AgentState.WaitingInRestaurant;
 			goToRestaurant();
@@ -139,7 +169,14 @@ public class CustomerAgent extends Agent {
 			EatFood();
 			return true;
 		}
+		
 		if (state == AgentState.Eating && event == AgentEvent.doneEating){
+			state = AgentState.WaitingForCheck;
+			AskForCheck();
+			return true;
+		}
+		
+		if (state == AgentState.WaitingForCheck && event == AgentEvent.GotCheck){
 			state = AgentState.Leaving;
 			leaveTable();
 			return true;
@@ -153,10 +190,40 @@ public class CustomerAgent extends Agent {
 	}
 
 	// Actions
+	
+	private void Leave() {
+		print("I'm leaving");
+		if (waiter != null) {
+			waiter.msgOutOfHere(this);
+		}
+		else {
+			host.msgIWontWait(this);
+		}
+		customerGui.DoExitRestaurant();
+	}
+	
+	private void AskForCheck() {
+		waiter.msgCheckPlease(this);
+	}
 
 	private void goToRestaurant() {
 		Do("Going to restaurant");
-		host.msgIWantFood(this);//send our instance, so he can respond to us
+		if ( bill != 0.00 && Wallet > bill) {
+			//if money is owed, pay
+			Wallet = Wallet - bill;
+			bill=0.00;
+			cashier.msgPayingMyBill(this);
+			print("I have $" + Wallet + " left");
+			host.msgIWantFood(this);
+		}
+		else if (bill != 0.00 && Wallet < bill) {
+			//if money is owed and can't pay
+			print("I owe the restaurant money, guess I have to wait here");
+			//start timer/dishes stuff
+		}
+		else {
+			host.msgIWantFood(this);//send our instance, so he can respond to us
+		}
 	}
 
 	private void SitDown() {
@@ -176,7 +243,7 @@ public class CustomerAgent extends Agent {
 				stateChanged();
 			}
 		},
-		10000);
+		3000);
 	}
 	
 	public void CallWaiter() {
@@ -184,7 +251,7 @@ public class CustomerAgent extends Agent {
 		print("I am ready to order");
 	}
 	
-private void OrderNewFood() {
+	private void OrderNewFood() {
 		
 		Random generator = new Random();
 		select++;
@@ -265,6 +332,12 @@ private void OrderNewFood() {
 
 	private void leaveTable() {
 		Do("Leaving.");
+		if (Wallet>=bill) {
+			Wallet = Wallet - bill;
+			bill = 0.00;
+			print("I have $" + Wallet + " left");
+			cashier.msgPayingMyBill(this);
+		}
 		waiter.msgLeavingTable(this);
 		customerGui.DoExitRestaurant();
 	}

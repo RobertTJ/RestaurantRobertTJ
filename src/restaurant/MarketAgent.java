@@ -24,10 +24,10 @@ public class MarketAgent extends Agent {
 
 		this.name = name;
 		
-		inventory.AddMore ("Pizza", 1);
-		inventory.AddMore ("Steak", 2);
-		inventory.AddMore ("Salad", 3);
-		inventory.AddMore ("Chicken", 4);
+		inventory.AddMore ("Pizza", 5);
+		inventory.AddMore ("Steak", 5);
+		inventory.AddMore ("Salad", 5);
+		inventory.AddMore ("Chicken", 5);
 	}
 	
 	Inventory inventory = new Inventory();
@@ -98,8 +98,8 @@ public class MarketAgent extends Agent {
 	
 	private void CanNotFullfillOrder(Order o) {
 		cook.msgCanNotFullfillOrder(o.getOrder().getChoice(), o.getAmount(), inventory.GetAmountOf(o.getOrder().getChoice()), this);
-		inventory.OrderAmount(o.getOrder().getChoice(), inventory.GetAmountOf(o.getOrder().getChoice()));
 		print("Delivererd " + inventory.GetAmountOf(o.getOrder().getChoice()) + " " + o.getOrder().getChoice());
+		inventory.OrderAmount(o.getOrder().getChoice(), inventory.GetAmountOf(o.getOrder().getChoice()));
 		print("Out of " + o.getOrder().getChoice());
 		allOrders.remove(o);
 		stateChanged();

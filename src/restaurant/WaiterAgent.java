@@ -1,6 +1,7 @@
 package restaurant;
 
 import agent.Agent;
+import restaurant.CashierAgent.Check;
 import restaurant.CustomerAgent.AgentState;
 import restaurant.gui.WaiterGui;
 import restaurant.CookAgent;
@@ -18,17 +19,17 @@ import java.util.concurrent.Semaphore;
 public class WaiterAgent extends Agent {
 	
 	public enum AgentState
-	{DoingNothing, SeatingCustomer, GetOrder, TakeOrderToCook, ServeFood, CleanTable, Break};
+	{DoingNothing, SeatingCustomer, GetOrder, TakeOrderToCook, ServeFood, GetCheck, TakeCheckToCustomer, CleanTable, Break};
 	
 	public AgentState state = AgentState.DoingNothing;//The start state
 	
 	public enum Event
-	{NewCustomerToSeat, DoneSeating, customerReady, GotOrder, FoodReady, customerDone, OutOfFood, WantABreak, TakeABreak};
+	{GoToCashier, GotCheck, NewCustomerToSeat, DoneSeating, customerReady, GotOrder, FoodReady, customerDone, OutOfFood, WantABreak, TakeABreak};
 	
 	private Event event = Event.DoneSeating;
 	private Event currentEvent = Event.DoneSeating;
 	
-	public enum CustState {NewOrderNeeded, Seating, Seated, ReadyToOrder, Ordered, WaitingForFood, OrderOut, Eating, Done, Leaving, Gone};
+	public enum CustState {other, NeedCheck, BringCheck, NewOrderNeeded, Seating, Seated, ReadyToOrder, Ordered, WaitingForFood, OrderOut, Eating, Done, Leaving, Gone};
 
 	public List<MyCustomers> myCustomers
 	= new ArrayList<MyCustomers>();
@@ -38,15 +39,16 @@ public class WaiterAgent extends Agent {
 	public int tablenumber;
 	private HostAgent host;
 	
+	private CashierAgent cashier;
+	
 	private CookAgent cook;
 	
 	public boolean busy = false;
 	
-	private MyCustomers CurrentCustomer;
+	private MyCustomers CurrentCustomer = new MyCustomers(new CustomerAgent("Frank"), -1, this);
 	
 	private Semaphore atTable = new Semaphore(0,true);
 	private Semaphore atCook = new Semaphore(0,true);
-	private Semaphore working = new Semaphore(0,true);
 	String name;
 	
 	private Menu currentMenu = new Menu();
@@ -59,14 +61,16 @@ public class WaiterAgent extends Agent {
 		this.name = name;
 	}
 	
+	public void SetCashier(CashierAgent a) {
+		this.cashier = a;
+	}
+	
 	public void setCook(CookAgent c) {
 		this.cook=c;
 	}
 	
 	public void SetHost(HostAgent h) {
 		this.host=h;
-		
-		//working.release();
 	}
 
 	public String getMaitreDName() {
@@ -77,6 +81,34 @@ public class WaiterAgent extends Agent {
 		return name;
 	}
 	// Messages
+	
+	public void msgOutOfHere(CustomerAgent c) {
+		for (MyCustomers myCustomer : myCustomers) {
+			if (myCustomer.getCustomer() == c) {
+				myCustomer.setState(CustState.Gone);
+				myCustomers.remove(myCustomer);
+			}
+		}
+		stateChanged();
+	}
+	
+	public void msgCheckPlease(CustomerAgent cust) {
+		for (MyCustomers myCustomer : myCustomers) {
+			if (myCustomer.getCustomer() == cust) myCustomer.setState(CustState.NeedCheck);
+		}
+		event = Event.GoToCashier;
+		allEvents.add(event);
+		stateChanged();
+	}
+	
+	public void msgHereIsCheck(CustomerAgent cust, Check check) {
+		for (MyCustomers myCustomer : myCustomers) {
+			if (myCustomer.getCustomer() == cust) myCustomer.setCheck(check);
+		}
+		event = Event.GotCheck;
+		allEvents.add(event);
+		stateChanged();
+	}
 	
 	public void msgCantBreakNow() {
 		print("I can't take a break now!");
@@ -95,7 +127,7 @@ public class WaiterAgent extends Agent {
 	public void msgNewCustomerToSeat(CustomerAgent cust, int table){
 		event = Event.NewCustomerToSeat;
 		allEvents.add(event);
-		CurrentCustomer= new MyCustomers(cust,table);
+		CurrentCustomer= new MyCustomers(cust,table, this);
 		CurrentCustomer.setState(CustState.Seating);
 		myCustomers.add(CurrentCustomer);
 		tablenumber=table;
@@ -242,6 +274,35 @@ public class WaiterAgent extends Agent {
 				break;
 			}
 		}
+		
+		for (Event pendingEvents : allEvents) {
+			if (pendingEvents == Event.GotCheck && this.state==AgentState.DoingNothing && busy == false) {
+				busy=true;
+				currentEvent = pendingEvents;
+				//allEvents.remove(pendingEvents);
+				break;
+			}
+		}
+		
+		for (Event pendingEvents : allEvents) {
+			if (pendingEvents == Event.GoToCashier && this.state==AgentState.DoingNothing && busy == false) {
+				busy=true;
+				currentEvent = pendingEvents;
+				//allEvents.remove(pendingEvents);
+				break;
+			}
+		}
+		
+		for (Event pendingEvents : allEvents) {
+			if (pendingEvents == Event.customerDone && busy == false) {
+				//print("trying");
+				busy=true;
+				currentEvent = pendingEvents;
+				//allEvents.remove(pendingEvents);
+				break;
+			}
+		}
+		
 		for (Event pendingEvents : allEvents) {
 			if (pendingEvents == Event.NewCustomerToSeat && busy == false) {
 				//print("but this works!");
@@ -267,15 +328,7 @@ public class WaiterAgent extends Agent {
 				break;
 			}
 		}
-		for (Event pendingEvents : allEvents) {
-			if (pendingEvents == Event.customerDone && busy == false) {
-				//print("trying");
-				busy=true;
-				currentEvent = pendingEvents;
-				//allEvents.remove(pendingEvents);
-				break;
-			}
-		}
+		
 		
 		
 		if (!busy) {
@@ -295,6 +348,29 @@ public class WaiterAgent extends Agent {
 						}
 						allEvents.remove(currentEvent);
 						DeliverFoodToTable(CurrentCustomer);
+						currentEvent=null;
+						return true;
+					}
+					
+					if (currentEvent == Event.GotCheck) {
+						this.state = AgentState.TakeCheckToCustomer;
+						for (MyCustomers myCustomer : myCustomers) {
+							if (myCustomer.getState() == CustState.BringCheck) {
+								myCustomer.setState(CustState.other);
+								CurrentCustomer = myCustomer;
+								break;
+								}
+						}
+						allEvents.remove(currentEvent);
+						BringCheckTo(CurrentCustomer);
+						currentEvent=null;
+						return true;
+					}
+					
+					if (currentEvent == Event.GoToCashier) {
+						this.state = AgentState.GetCheck;
+						allEvents.remove(currentEvent);
+						GetCheckFromCashier();
 						currentEvent=null;
 						return true;
 					}
@@ -373,6 +449,36 @@ public class WaiterAgent extends Agent {
 	}
 
 	// Actions
+	
+	private void GetCheckFromCashier() {
+		for (MyCustomers myCustomer : myCustomers) {
+			if (myCustomer.getState() == CustState.NeedCheck) {
+				myCustomer.setState(CustState.BringCheck);
+				CurrentCustomer = myCustomer;
+				break;
+				}
+		}
+		print("Getting check for " + CurrentCustomer.getCustomer());
+
+		cashier.msgCheckPlease(CurrentCustomer);
+		stateChanged();
+	}
+	
+	private void BringCheckTo(MyCustomers c) {
+		print("Taking check to " + c.getCustomer());
+		waiterGui.DoGoToTable(c.getCustomer(), c.getTableNumber());
+		try {
+			atTable.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		busy=true;
+		this.state=AgentState.TakeCheckToCustomer;
+
+		c.getCustomer().msgHereIsYourBill(c.getCheck());
+		waiterGui.DoLeaveCustomer();
+	}
 	
 	private void TakeABreak() {
 		this.Pause();
@@ -539,6 +645,9 @@ public class WaiterAgent extends Agent {
 		this.state=AgentState.CleanTable;
 		host.msgLeavingTable(CurrentCustomer.getCustomer(), this);
 		CurrentCustomer.setState(CustState.Gone);
+		
+		myCustomers.remove(CurrentCustomer);
+		 
 		print("Table clean");
 		waiterGui.DoLeaveCustomer();
 	  }
@@ -559,9 +668,20 @@ public class WaiterAgent extends Agent {
 		String optionTwo = "Steak";
 		String optionThree = "Salad";
 		String optionFour = "Chicken";
+		double costOne = 8.99;
+		double costTwo = 15.99;
+		double costThree = 5.99;
+		double costFour = 10.99;
 		
 		Menu() {
 			
+		}
+		
+		double GetCost(String choice) {
+			if (choice == "Pizza") return costOne;
+			else if (choice == "Steak") return costTwo;
+			else if (choice == "Salad") return costThree;
+			else return costFour;
 		}
 		
 		String ChooseOne() {
@@ -581,15 +701,37 @@ public class WaiterAgent extends Agent {
 		}
 	}
 	
-	private class MyCustomers {
+	public class MyCustomers {
 		CustomerAgent customer;
 		int tableNumber;
 		String order;
 		CustState currentState;
+		WaiterAgent waiter;
+		double bill;
+		Check CheckRepublic;
+		boolean owed;
 
-		MyCustomers(CustomerAgent customer, int tableNumber) {
+		MyCustomers(CustomerAgent customer, int tableNumber, WaiterAgent w) {
 			this.tableNumber = tableNumber;
 			this.customer = customer;
+			this.waiter = w;
+			owed = false;
+		}
+		
+		void setOwed(boolean t) {
+			owed = t;
+		}
+		
+		boolean getOwed() {
+			return owed;
+		}
+		
+		void setCheck(Check k) {
+			CheckRepublic = k;
+		}
+		
+		Check getCheck() {
+			return CheckRepublic;
 		}
 		
 		void setState (CustState s) {
@@ -598,6 +740,10 @@ public class WaiterAgent extends Agent {
 		
 		CustState getState () {
 			return currentState;
+		}
+		
+		double GetBill() {
+			return bill;
 		}
 		
 		void setTableNumber (int n) {
@@ -610,10 +756,15 @@ public class WaiterAgent extends Agent {
 		
 		void setOrder (String o) {
 			order = o;
+			bill = currentMenu.GetCost(o);
 		}
 		
 		String getOrder () {
 			return order;
+		}
+		
+		WaiterAgent getWaiter() {
+			return waiter;
 		}
 
 		void setCustomer(CustomerAgent cust) {

@@ -1,5 +1,6 @@
 package restaurant.gui;
 
+import restaurant.CashierAgent;
 import restaurant.CustomerAgent;
 import restaurant.HostAgent;
 import restaurant.MarketAgent;
@@ -21,18 +22,14 @@ public class RestaurantPanel extends JPanel {
     //Host, cook, waiters and customers
     private HostAgent host = new HostAgent("Sarah");
     private HostGui hostGui = new HostGui(host);
+   
     
-    
-   // private WaiterAgent waiter = new WaiterAgent("Frank");
-    //private WaiterGui waiterGui = new WaiterGui(waiter);
-    
-   // private WaiterAgent waiter2 = new WaiterAgent("Fred");
-   // private WaiterGui waiterGui2 = new WaiterGui(waiter);
-    
-    private CookAgent cook = new CookAgent("Tim");
     private MarketAgent market1 = new MarketAgent("Bob");
     private MarketAgent market2 = new MarketAgent("Bobby");
     private MarketAgent market3 = new MarketAgent("Bobert");
+    private CashierAgent cashier = new CashierAgent("Jimmy");
+    private CookAgent cook = new CookAgent("Tim");
+
 
     
 
@@ -59,26 +56,11 @@ public class RestaurantPanel extends JPanel {
         
         host.setGui(hostGui);
         host.setRestGui(gui);
-       
-      // waiter.setGui(waiterGui);
-        //waiter2.setGui(waiterGui2);
-       // host.allWaiters.add(waiter);
-       // host.allWaiters.add(waiter2);
 
-      //  waiter.SetHost (host);
-       // waiter2.SetHost(host);
+        cashier.startThread();
         
-       // waiter.setCook(cook);
-       // waiter2.setCook(cook);
-
-
-        
-        //gui.animationPanel.addGui(waiterGui);
-       // waiter.startThread();
-      // gui.animationPanel.addGui(waiterGui2);
-        //waiter2.startThread();
-       
         cook.startThread();
+        
         market1.startThread();
         market1.SetCook(cook);
         
@@ -104,6 +86,7 @@ public class RestaurantPanel extends JPanel {
         initRestLabel();
         add(restLabel);
         add(group);
+        //cook.SetPayingAttention(true);
     }
 
     public int getsize(){
@@ -126,34 +109,6 @@ public class RestaurantPanel extends JPanel {
         restLabel.add(new JLabel("               "), BorderLayout.EAST);
         restLabel.add(new JLabel("               "), BorderLayout.WEST);
     }
-
-    /**
-     * When a customer or waiter is clicked, this function calls
-     * updatedInfoPanel() from the main gui so that person's information
-     * will be shown
-     *
-     * @param type indicates whether the person is a customer or waiter
-     * @param name name of person
-     */
-  /*  public void showInfo(String type, String name) {
-
-        if (type.equals("Customers")) {
-
-            for (int i = 0; i < customers.size(); i++) {
-                CustomerAgent temp = customers.get(i);
-                JCheckBox tempalso = customerPanel.stateCB2.get(i);
-                
-                tempalso.setSelected(temp.getGui().isHungry());
-                //Is customer hungry? Hack. Should ask customerGui
-                tempalso.setEnabled(!temp.getGui().isHungry());
-              // Hack. Should ask customerGui
-                
-                
-              //  if (temp.getName() == name)
-               //     gui.updateInfoPanel(temp);
-            }
-        }
-    }*/
     
     public void OnBreak(WaiterAgent w) {
     	WaiterAgent temp = new WaiterAgent("Ted");
@@ -202,6 +157,11 @@ public class RestaurantPanel extends JPanel {
     public void pause() {
     	host.Pause();
     	cook.Pause();
+    	
+    	market1.Pause();
+    	market2.Pause();
+    	market3.Pause();
+    	
     	for (WaiterAgent w : waiters) {
     		w.Pause();
     	}
@@ -214,6 +174,11 @@ public class RestaurantPanel extends JPanel {
     public void resume() {
     	host.Resume();
     	cook.Resume();
+    	
+    	market1.Resume();
+    	market2.Resume();
+    	market3.Resume();
+    	
     	for (WaiterAgent w : waiters) {
     		w.Resume();
     	}
@@ -235,22 +200,10 @@ public class RestaurantPanel extends JPanel {
     		CustomerAgent c = new CustomerAgent(name);	
     		CustomerGui g = new CustomerGui(c, gui);
 
-    		gui.animationPanel.addGui(g);// dw
-    		//gui.allAgents.add(c);
+    		gui.animationPanel.addGui(g);
     		c.setHost(host);
     		c.setGui(g);
-    		/*
-    		 ALERT ALERT ALERT ALERT
-    	 	 
-    	 	 ALERT ALERT ALERT ALERT
-
-    		 ALERT ALERT ALERT ALERT
-
-    		 ALERT ALERT ALERT ALERT
-
-
-    		 */
-    		//c.msgSetWaiter(waiter);//PROBLEM FIX FOR MULT WAITERS
+    	    c.SetCashier (cashier);
     		customers.add(c);
     		c.startThread();
     	}
@@ -261,10 +214,9 @@ public class RestaurantPanel extends JPanel {
     		
     		w.setGui(wg);
     	    host.msgNewWaiter(w);
-    	    //host.customersServed.add(0);
 
     	    w.SetHost (host);
-    	        
+    	    w.SetCashier (cashier);
     	    w.setCook(cook);
     	        
     	    gui.animationPanel.addGui(wg);

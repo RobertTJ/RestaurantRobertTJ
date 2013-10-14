@@ -21,6 +21,9 @@ public class HostAgent extends Agent {
 	//with List semantics.
 	public List<CustomerAgent> waitingCustomers
 	= new ArrayList<CustomerAgent>();
+	
+	public List<Boolean> messaged = new ArrayList<Boolean>();
+	
 	public List<MyWaiters> allWaiters
 	= new ArrayList<MyWaiters>();
 	//public Vector<Integer> customersServed = new Vector<Integer>(10);
@@ -34,7 +37,6 @@ public class HostAgent extends Agent {
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	private String name;
-	private Semaphore atTable = new Semaphore(2,true);
 
 	public HostGui hostGui = null;
 	
@@ -75,6 +77,7 @@ public class HostAgent extends Agent {
 	
 	public void msgNewWaiter(WaiterAgent w) {
 		allWaiters.add(new MyWaiters(w));
+		
 		stateChanged();
 	}
 	
@@ -84,6 +87,7 @@ public class HostAgent extends Agent {
 
 	public void msgIWantFood(CustomerAgent cust) {
 		waitingCustomers.add(cust);
+		messaged.add(false);
 		stateChanged();
 	}
 
@@ -124,6 +128,11 @@ public class HostAgent extends Agent {
 		}
 		stateChanged();
 	}
+	
+	public void msgIWontWait(CustomerAgent c) {
+		waitingCustomers.remove(c);
+		stateChanged();
+	}
 
 
 	/**
@@ -140,12 +149,8 @@ public class HostAgent extends Agent {
 		for ( int i =0; i<allWaiters.size();i++) {
 			if (allWaiters.get(i).GetWantABreak() == true && allWaiters.get(i).GetNumberOfCustomers()==0) {
 				if (WaiterOnBreak == -1 && allWaiters.size()>1) {
-					allWaiters.get(i).TakeABreak();
-					allWaiters.get(i).GetWaiter().msgTakeABreak();
-					WaiterOnBreak=i;
-					RestGUI.OnABreak(allWaiters.get(i).GetWaiter());
-					print(allWaiters.get(i).GetWaiter().getName() + " is taking a break");
-
+					Break(i);
+					return true;
 				}
 			}
 		}
@@ -156,9 +161,10 @@ public class HostAgent extends Agent {
 		for (Table table : tables) {
 			if (!table.isOccupied()) {
 				if (!waitingCustomers.isEmpty()) {
+					LeastBusyWaiter = 0;
+					if (WaiterOnBreak == 0) LeastBusyWaiter=1;
 					for ( int i =0; i<allWaiters.size();i++) {
-						if (WaiterOnBreak!=0)	LeastBusyWaiter = 0;
-						else LeastBusyWaiter = 1;
+						if (WaiterOnBreak == i) i++;
 						if (allWaiters.get(i).GetNumberOfCustomers() < allWaiters.get(LeastBusyWaiter).GetNumberOfCustomers() && i != WaiterOnBreak) {
 							LeastBusyWaiter = i;
 						}
@@ -178,6 +184,23 @@ public class HostAgent extends Agent {
 			}
 		}
 		}
+		
+		
+		if(!waitingCustomers.isEmpty()){
+			for (Table table : tables) {
+				if (!table.isOccupied()) {
+					return false;
+				}
+			}
+			
+			for (int i = 0; i<waitingCustomers.size();i++) {
+				if (messaged.get(i) == false) {
+					messaged.set(i, true);
+					waitingCustomers.get(i).msgRestaurantFull();
+				}
+			}
+		}
+			
 		return false;
 		//we have tried all our rules and found
 		//nothing to do. So return false to main loop of abstract agent
@@ -185,35 +208,28 @@ public class HostAgent extends Agent {
 	}
 
 	// Actions
+	
+	private void Break(int i) {
+		allWaiters.get(i).TakeABreak();
+		allWaiters.get(i).GetWaiter().msgTakeABreak();
+		WaiterOnBreak=i;
+		RestGUI.OnABreak(allWaiters.get(i).GetWaiter());
+		print(allWaiters.get(i).GetWaiter().getName() + " is taking a break");
+	}
 
 	private void seatCustomer(WaiterAgent waiter, CustomerAgent customer, Table table) {
 		waiter.msgNewCustomerToSeat(customer, table.getTable());		
 		print(waiter.getName() + " seating " + customer + " at " + table);
-		/*try {
-			atTable.acquire();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+		
 		table.setOccupant(customer);
 		waitingCustomers.remove(customer);
-		//hostGui.DoLeaveCustomer();
+		messaged.remove(0);
+	}
+	
+	private void RestaurantFull(CustomerAgent c) {
+		
 	}
 
-	// The animation DoXYZ() routines
-	/*private void DoSeatCustomer(CustomerAgent customer, Table table) {
-		//Notice how we print "customer" directly. It's toString method will do it.
-		//Same with "table"
-		print("Seating " + customer + " at " + table);
-		hostGui.DoBringToTable(customer, table.tableNumber); 
-
-	}*/
-	
-	/*public void msgAtFront(){
-		state = AgentState.DoingNothing;
-		//atTable.release();
-		stateChanged();
-	}*/
 
 	//utilities
 
