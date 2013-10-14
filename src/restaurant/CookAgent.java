@@ -40,6 +40,7 @@ public class CookAgent extends Agent {
 		inventory.AddMore ("Steak", 1);
 		inventory.AddMore ("Salad", 1);
 		inventory.AddMore ("Chicken",1);
+		stateChanged();
 	}
 
 	public List<Order> allOrders
@@ -68,10 +69,12 @@ public class CookAgent extends Agent {
 		OutOfChicken.add(false);
 		OutOfPizza.add(false);
 		OutOfSalad.add(false);
+		stateChanged();
 	}
 	
 	public void SetHost(HostAgent h) {
 		this.host=h;
+		stateChanged();
 	}
 	
 	public String getMaitreDName() {
@@ -144,6 +147,7 @@ public class CookAgent extends Agent {
 				}
 			}
 		}
+		stateChanged();
 	}
 
 	

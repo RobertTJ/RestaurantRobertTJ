@@ -28,6 +28,7 @@ public class CustomerAgent extends Agent {
 	private WaiterAgent waiter = null;
 	private CashierAgent cashier;
 	int select;
+	int payday=0;
 
 	//    private boolean isHungry = false; //hack for gui
 	public enum AgentState
@@ -73,6 +74,13 @@ public class CustomerAgent extends Agent {
 
 	public void gotHungry() {//from animation
 		print("I'm hungry");
+		if(payday==0) {
+			Wallet=Wallet + 12;	
+			print("Payday! Whoooo!");
+		}
+		payday++; 
+		if (payday == 2 )payday=0;
+
 		event = AgentEvent.gotHungry;
 		stateChanged();
 	}

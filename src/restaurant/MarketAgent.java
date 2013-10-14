@@ -5,6 +5,8 @@ import agent.Agent;
 import restaurant.HostAgent;
 //import restaurant.CookAgent.Order;
 
+import restaurant.CustomerAgent.AgentEvent;
+
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.ArrayList;
@@ -15,9 +17,10 @@ import java.util.TimerTask;
 public class MarketAgent extends Agent {
 
 	private String name;
+	
 	HostAgent host;
 	CookAgent cook;
-	
+	Timer timer = new Timer();
 
 	public MarketAgent(String name) {
 		super();
@@ -34,6 +37,7 @@ public class MarketAgent extends Agent {
 	
 	public void SetHost(HostAgent h) {
 		this.host=h;
+		stateChanged();
 	}
 	
 	public void SetCook(CookAgent c) {
@@ -87,22 +91,45 @@ public class MarketAgent extends Agent {
 
 	// Actions
 	
-	private void FullfillOrder(Order o) {
-		cook.msgOrderFullfilled(o.getOrder().getChoice(), o.getAmount());
+	private void FullfillOrder(final Order o) {
+		print("Delivering " + o.getAmount() + " " + o.getOrder().getChoice());
+
 		inventory.OrderAmount(o.getOrder().getChoice(), o.getAmount());
 		allOrders.remove(o);
-		print("Delivererd " + o.getAmount() + " " + o.getOrder().getChoice());
-		print("Order fullfilled.");
-		stateChanged();
+		
+		timer.schedule(new TimerTask() {
+			Object cookie = 1;
+			public void run() {
+				cook.msgOrderFullfilled(o.getOrder().getChoice(), o.getAmount());
+				print("Order fullfilled.");
+				stateChanged();
+			}
+		},
+		8000);
 	}
 	
-	private void CanNotFullfillOrder(Order o) {
-		cook.msgCanNotFullfillOrder(o.getOrder().getChoice(), o.getAmount(), inventory.GetAmountOf(o.getOrder().getChoice()), this);
-		print("Delivererd " + inventory.GetAmountOf(o.getOrder().getChoice()) + " " + o.getOrder().getChoice());
-		inventory.OrderAmount(o.getOrder().getChoice(), inventory.GetAmountOf(o.getOrder().getChoice()));
-		print("Out of " + o.getOrder().getChoice());
-		allOrders.remove(o);
+	/*private void FullfillOrder(Order o) {
+		
+		
 		stateChanged();
+	}*/
+	
+	private void CanNotFullfillOrder(final Order o) {
+		print("Delivering " + inventory.GetAmountOf(o.getOrder().getChoice()) + " " + o.getOrder().getChoice());
+		inventory.OrderAmount(o.getOrder().getChoice(), inventory.GetAmountOf(o.getOrder().getChoice()));
+		
+		allOrders.remove(o);
+
+		timer.schedule(new TimerTask() {
+			Object cookie = 1;
+			public void run() {
+				cook.msgCanNotFullfillOrder(o.getOrder().getChoice(), o.getAmount(), inventory.GetAmountOf(o.getOrder().getChoice()), getMarketAgent());
+				print("Delivererd " + o.getAmount() + " " + o.getOrder().getChoice());
+				print("Out of " + o.getOrder().getChoice());
+				stateChanged();
+			}
+		},
+		8000);
 	}
 	
 	// Classes
@@ -222,6 +249,8 @@ public class MarketAgent extends Agent {
 		
 	}
 	
-	
+	private MarketAgent getMarketAgent() {
+		return this;
+	}
 }
 
