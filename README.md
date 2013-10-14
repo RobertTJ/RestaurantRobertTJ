@@ -18,12 +18,23 @@
   + Customers are added by clicking the "Add Customer" button, at which point the current text in the text field 
   + becomes the new customer's name and his/her initial hunger status is determined by the state of the "Hungry?" 
   + checkbox next to the "Add Customer" button: selected to start hungry and unselected to start not hungry.
+  + 
   + Waiters are added by clicking the "Add Waiter" button, at which point the current text in the text field 
   + becomes the new waiter's name.  There is no list of waiters shown, but they are added when the button is pressed.
+  + 
   + The "Pause" button pauses the actions of each agent after they have completed their current action, but before they 
   + attempt to select another action.  After the "Pause" button is pressed it is replaced by a "Resume" button in the 
   + same location.  Pressing the "Resume" button resumes normal agent action and replaces the "Resume" button with the
   + "Pause" button once more.
+  + 
+  + A checkbox is available for a waiter to go on break. He will only go on break if there is at least one other waiter, 
+  + no other waiters are on break, and he has no customers. If there is no other waiter the checkbox will immediately 
+  + return to unselected and enabled. If the waiter cannot go on break now because another waiter is on break or he 
+  + has customers the checkbox will remain selected and become disabled. When he can next take a break he will.
+  + When a waiter is on break the checkbox is selected and enabled. Unchecking the box will return the waiter to work.
+  
+###Non-Normative Scenarios
+  + All Non-Normative Scenarios work, though they can be difficult to create from normal function.
 
 ###Design Documents
-  +Design documents are in the Design Doc folder in SRC in PDF format
+  +Design documents are in the Design Doc folder in the restaurant_roberttj repository.  They are in PDF/JPG format.
