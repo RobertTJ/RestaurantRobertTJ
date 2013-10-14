@@ -197,7 +197,7 @@ public class HostAgent extends Agent {
 			for (int i = 0; i<waitingCustomers.size();i++) {
 				if (messaged.get(i) == false) {
 					messaged.set(i, true);
-					waitingCustomers.get(i).msgRestaurantFull();
+					RestaurantFull(i);
 				}
 			}
 		}
@@ -227,8 +227,8 @@ public class HostAgent extends Agent {
 		messaged.remove(0);
 	}
 	
-	private void RestaurantFull(CustomerAgent c) {
-		
+	private void RestaurantFull(int i) {
+		waitingCustomers.get(i).msgRestaurantFull();
 	}
 
 
