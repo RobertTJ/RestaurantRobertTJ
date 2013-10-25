@@ -4,6 +4,9 @@ import restaurant.CashierAgent.Check;
 import restaurant.WaiterAgent.Menu;
 import restaurant.gui.CustomerGui;
 import restaurant.gui.RestaurantGui;
+import restaurant.interfaces.Cashier;
+import restaurant.interfaces.Customer;
+import restaurant.interfaces.Waiter;
 import agent.Agent;
 
 import java.util.Random;
@@ -13,7 +16,7 @@ import java.util.TimerTask;
 /**
  * Restaurant customer agent.
  */
-public class CustomerAgent extends Agent {
+public class CustomerAgent extends Agent implements Customer {
 	private String name;
 	private String order = "Salad";
 	private int hungerLevel = 5;        // determines length of meal
@@ -25,8 +28,8 @@ public class CustomerAgent extends Agent {
 
 	// agent correspondents
 	private HostAgent host;
-	private WaiterAgent waiter = null;
-	private CashierAgent cashier;
+	private Waiter waiter = null;
+	private Cashier cashier;
 	int select;
 	int payday=0;
 
@@ -59,19 +62,23 @@ public class CustomerAgent extends Agent {
 		this.host = host;
 	}
 	
-	public void SetCashier(CashierAgent a) {
+	public void SetCashier(Cashier a) {
 		this.cashier = a;
 	}
 	
-	public void SetWaiter(WaiterAgent w) {
+	public void SetWaiter(Waiter w) {
 		this.waiter=w;
+	}
+	
+	public Waiter GetWaiter() {
+		return waiter;
 	}
 
 	public String getCustomerName() {
 		return name;
 	}
 	// Messages
-
+	@Override
 	public void gotHungry() {//from animation
 		print("I'm hungry");
 		if(payday==0) {
@@ -84,7 +91,7 @@ public class CustomerAgent extends Agent {
 		event = AgentEvent.gotHungry;
 		stateChanged();
 	}
-	
+	@Override
 	public void msgRestaurantFull() {
 		Random generator = new Random();
 		select = generator.nextInt(2);
@@ -93,43 +100,43 @@ public class CustomerAgent extends Agent {
 			stateChanged();
 		}
 	}
-	
+	@Override
 	public void msgHereIsYourBill(Check k) {
 		if (k!= null) bill = k.GetBill();
 		event = AgentEvent.GotCheck;
 		stateChanged();
 	}
-	
-	public void msgFollowMeToTable(WaiterAgent w, Menu m) {
+	@Override
+	public void msgFollowMeToTable(Waiter w, Menu m) {
 		this.waiter=w;
 		this.menu = m;
 		//print("Received msgSitAtTable");
 		event = AgentEvent.followWaiter;
 		stateChanged();
 	}
-
+	@Override
 	public void msgAnimationFinishedGoToSeat() {
 		//from animation
 		event = AgentEvent.seated;
 		stateChanged();
 	}
-	
+	@Override
 	public void msgAnimationFinishedLeaveRestaurant() {
 		//from animation
 		event = AgentEvent.doneLeaving;
 		stateChanged();
 	}
-	
+	@Override
 	public void msgHereForNewOrder() {
 		event = AgentEvent.beingHelpedAgain;
 		stateChanged();
 	}
-	
+	@Override
 	public void msgHereForOrder() {
 		event = AgentEvent.beingHelped;
 		stateChanged();
 	}
-	
+	@Override
 	public void msgDeliveredFood() {
 		event=AgentEvent.gotFood;
 		stateChanged();
@@ -244,7 +251,6 @@ public class CustomerAgent extends Agent {
 	}
 	
 	private void PickUpAndPeruseMenu() {
-	CustomerAgent temp = this;
 		timer.schedule(new TimerTask() {
 			Object cookies = 1;
 			public void run() {

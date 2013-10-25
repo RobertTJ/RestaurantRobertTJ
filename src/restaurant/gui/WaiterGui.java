@@ -4,6 +4,7 @@ package restaurant.gui;
 import restaurant.CustomerAgent;
 import restaurant.HostAgent;
 import restaurant.WaiterAgent;
+import restaurant.interfaces.Customer;
 
 import java.awt.*;
 
@@ -96,7 +97,7 @@ public class WaiterGui implements Gui {
         return true;
     }
 
-    public void DoBringToTable(CustomerAgent customer, int n) {
+    public void DoBringToTable(Customer customer, int n) {
         if (n==1){
         	xDestination = xTable1 + shifttwenty;
             yDestination = yTable1 - shifttwenty;
@@ -117,7 +118,7 @@ public class WaiterGui implements Gui {
         }
     }
     
-    public void DoGoToTable(CustomerAgent customer, int n) {
+    public void DoGoToTable(Customer customer, int n) {
         if (n==1){
         	xDestination = xTable1 + shifttwenty;
             yDestination = yTable1 - shifttwenty;
@@ -135,7 +136,7 @@ public class WaiterGui implements Gui {
         }
     }
         
-    public void BringFoodToCustomer(CustomerAgent customer, int tableN, String choice) {
+    public void BringFoodToCustomer(Customer customer, int tableN, String choice) {
     	if (choice=="Steak") {
     		order="ST?";
     	}

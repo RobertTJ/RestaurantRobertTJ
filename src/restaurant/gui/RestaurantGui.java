@@ -2,6 +2,7 @@ package restaurant.gui;
 
 import restaurant.CustomerAgent;
 import restaurant.WaiterAgent;
+import restaurant.interfaces.Waiter;
 import agent.Agent;
 
 import javax.swing.*;
@@ -133,7 +134,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
      *
      * @param c reference to the customer
      */
-    public void OnABreak(WaiterAgent w) {
+    public void OnABreak(Waiter w) {
     	restPanel.OnBreak(w);
     }
     

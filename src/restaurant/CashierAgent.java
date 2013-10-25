@@ -2,16 +2,19 @@ package restaurant;
 
 import agent.Agent;
 import restaurant.gui.HostGui;
+import restaurant.interfaces.Cashier;
+import restaurant.interfaces.Customer;
+import restaurant.interfaces.Waiter;
 import restaurant.HostAgent;
+import restaurant.WaiterAgent.CustState;
 import restaurant.WaiterAgent.MyCustomers;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class CashierAgent extends Agent {
+public class CashierAgent extends Agent implements Cashier{
 
 	private String name;
 	HostAgent host;
@@ -22,10 +25,10 @@ public class CashierAgent extends Agent {
 		this.name = name;
 	}
 	
-	public List<MyCustomers> Customers
-	= new ArrayList<MyCustomers>();
+	public List<DebtedCustomers> Customers
+	= new ArrayList<DebtedCustomers>();
 	
-	public void addCustomer(MyCustomers c) {
+	public void addCustomer(DebtedCustomers c) {
 		Customers.add(c);
 		stateChanged();
 	}
@@ -46,19 +49,22 @@ public class CashierAgent extends Agent {
 
 	// Messages
 	
-	public void msgCheckPlease(MyCustomers C){
+	@Override
+	public void msgCheckPlease(Customer C, int TableNumber, double b){
 		boolean herebefore = false;
-		for (MyCustomers cust : Customers) {
-			if (cust == C) {
+		for (DebtedCustomers cust : Customers) {
+			if (cust.getCustomer() == C) {
 				cust.setOwed(false);
+				//cust.
 				herebefore=true;
 			}
 		}
-		if (herebefore==false) Customers.add(C);
+		if (herebefore==false) Customers.add(new DebtedCustomers(C,TableNumber,b));
 		stateChanged();
 	}
 	
-	public void msgPayingMyBill(CustomerAgent c) {
+	@Override
+	public void msgPayingMyBill(Customer c) {
 		print (c + " has payed");
 		
 	}
@@ -69,7 +75,7 @@ public class CashierAgent extends Agent {
 	protected boolean pickAndExecuteAnAction() {
 	
 		if(!Customers.isEmpty()) {
-			for (MyCustomers cust : Customers) {
+			for (DebtedCustomers cust : Customers) {
 				if (cust.getOwed()==false) {
 					GiveBillToWaiter(cust);
 					cust.setOwed(true);
@@ -86,7 +92,7 @@ public class CashierAgent extends Agent {
 	// Actions
 	
 	
-	private void GiveBillToWaiter(MyCustomers CurrentCustomer) {
+	private void GiveBillToWaiter(DebtedCustomers CurrentCustomer) {
 		print("Here is the check for " + CurrentCustomer.getCustomer());
 		Check ThisCheck = new Check(CurrentCustomer.GetBill());
 		CurrentCustomer.getWaiter().msgHereIsCheck(CurrentCustomer.getCustomer(), ThisCheck);
@@ -113,6 +119,76 @@ public class CashierAgent extends Agent {
 		}
 	}
 	
+	public class DebtedCustomers {
+		Customer customer;
+		int tableNumber;
+		String order;
+		CustState currentState;
+		Waiter waiter;
+		double bill;
+		Check CheckRepublic;
+		boolean owed;
+
+		public DebtedCustomers(Customer customer, int tableNumber, double b) {
+			this.tableNumber = tableNumber;
+			this.customer = customer;
+			this.waiter = customer.GetWaiter();
+			owed = false;
+			bill = b;
+		}
+		
+		void setOwed(boolean t) {
+			owed = t;
+		}
+		
+		boolean getOwed() {
+			return owed;
+		}
+		
+		void setCheck(Check k) {
+			CheckRepublic = k;
+		}
+		
+		Check getCheck() {
+			return CheckRepublic;
+		}
+		
+		void setState (CustState s) {
+			currentState = s;
+		}
+		
+		CustState getState () {
+			return currentState;
+		}
+		
+		double GetBill() {
+			return bill;
+		}
+		
+		void setTableNumber (int n) {
+			tableNumber = n;
+		}
+		
+		int getTableNumber () {
+			return tableNumber;
+		}
+		
+		String getOrder () {
+			return order;
+		}
+		
+		Waiter getWaiter() {
+			return waiter;
+		}
+
+		void setCustomer(Customer cust) {
+			customer = cust;
+		}
+
+		Customer getCustomer() {
+			return customer;
+		}
+	}
 	
 }
 

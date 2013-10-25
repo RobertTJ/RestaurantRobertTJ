@@ -4,6 +4,8 @@ import agent.Agent;
 import restaurant.CustomerAgent.AgentState;
 import restaurant.gui.HostGui;
 import restaurant.gui.RestaurantGui;
+import restaurant.interfaces.Customer;
+import restaurant.interfaces.Waiter;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -19,8 +21,8 @@ public class HostAgent extends Agent {
 	static final int NTABLES = 3;//a global for the number of tables.
 	//Notice that we implement waitingCustomers using ArrayList, but type it
 	//with List semantics.
-	public List<CustomerAgent> waitingCustomers
-	= new ArrayList<CustomerAgent>();
+	public List<Customer> waitingCustomers
+	= new ArrayList<Customer>();
 	
 	public List<Boolean> messaged = new ArrayList<Boolean>();
 	
@@ -75,23 +77,23 @@ public class HostAgent extends Agent {
 	}
 	// Messages
 	
-	public void msgNewWaiter(WaiterAgent w) {
+	public void msgNewWaiter(Waiter w) {
 		allWaiters.add(new MyWaiters(w));
 		
 		stateChanged();
 	}
 	
-	public void msgImFree(WaiterAgent w) {
+	public void msgImFree(Waiter w) {
 		stateChanged();
 	}
 
-	public void msgIWantFood(CustomerAgent cust) {
+	public void msgIWantFood(Customer cust) {
 		waitingCustomers.add(cust);
 		messaged.add(false);
 		stateChanged();
 	}
 
-	public void msgLeavingTable(CustomerAgent cust, WaiterAgent w) { //TO DO - add waiter pass to call myWaiters customer--
+	public void msgLeavingTable(Customer cust, Waiter w) { //TO DO - add waiter pass to call myWaiters customer--
 		for (Table table : tables) {
 			if (table.getOccupant() == cust) {
 				print(cust + " leaving " + table);
@@ -108,7 +110,7 @@ public class HostAgent extends Agent {
 
 	}
 	
-	public void msgIWantABreak(WaiterAgent w) {
+	public void msgIWantABreak(Waiter w) {
 		for ( int i =0; i<allWaiters.size();i++) {
 			if (w == allWaiters.get(i).GetWaiter()) {
 				allWaiters.get(i).IWantABreak();
@@ -118,7 +120,7 @@ public class HostAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void msgBackFromBreak(WaiterAgent w) {
+	public void msgBackFromBreak(Waiter w) {
 		for ( int i =0; i<allWaiters.size();i++) {
 			if (w == allWaiters.get(i).GetWaiter()) {
 				allWaiters.get(i).BackFromBreak();
@@ -129,7 +131,7 @@ public class HostAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void msgIWontWait(CustomerAgent c) {
+	public void msgIWontWait(Customer c) {
 		print(c + " does not want to wait and has left");
 		waitingCustomers.remove(c);
 		stateChanged();
@@ -218,7 +220,7 @@ public class HostAgent extends Agent {
 		print(allWaiters.get(i).GetWaiter().getName() + " is taking a break");
 	}
 
-	private void seatCustomer(WaiterAgent waiter, CustomerAgent customer, Table table) {
+	private void seatCustomer(Waiter waiter, Customer customer, Table table) {
 		waiter.msgNewCustomerToSeat(customer, table.getTable());		
 		print(waiter.getName() + " seating " + customer + " at " + table);
 		
@@ -243,19 +245,19 @@ public class HostAgent extends Agent {
 	}
 	
 	private class MyWaiters {
-		WaiterAgent waiter;
+		Waiter waiter;
 		boolean WantABreak;
 		boolean OnBreak;
 		int NumberOfCustomers;
 		
-		MyWaiters (WaiterAgent w) {
+		MyWaiters (Waiter w) {
 			waiter = w;
 			WantABreak =false;
 			OnBreak = false;
 			NumberOfCustomers = 0;
 		}
 		
-		public WaiterAgent GetWaiter() {
+		public Waiter GetWaiter() {
 			return waiter;
 		}
 		
@@ -295,7 +297,7 @@ public class HostAgent extends Agent {
 	
 
 	private class Table {
-		CustomerAgent occupiedBy;
+		Customer occupiedBy;
 		int tableNumber;
 
 		Table(int tableNumber) {
@@ -306,7 +308,7 @@ public class HostAgent extends Agent {
 			return tableNumber;
 		}
 
-		void setOccupant(CustomerAgent cust) {
+		void setOccupant(Customer cust) {
 			occupiedBy = cust;
 		}
 
@@ -314,7 +316,7 @@ public class HostAgent extends Agent {
 			occupiedBy = null;
 		}
 
-		CustomerAgent getOccupant() {
+		Customer getOccupant() {
 			return occupiedBy;
 		}
 

@@ -4,6 +4,9 @@ import agent.Agent;
 import restaurant.CashierAgent.Check;
 import restaurant.CustomerAgent.AgentState;
 import restaurant.gui.WaiterGui;
+import restaurant.interfaces.Cashier;
+import restaurant.interfaces.Customer;
+import restaurant.interfaces.Waiter;
 import restaurant.CookAgent;
 
 import java.util.*;
@@ -16,7 +19,7 @@ import java.util.concurrent.Semaphore;
 //does all the rest. Rather than calling the other agent a waiter, we called him
 //the HostAgent. A Host is the manager of a restaurant who sees that all
 //is proceeded as he wishes.
-public class WaiterAgent extends Agent {
+public class WaiterAgent extends Agent implements Waiter{
 	
 	public enum AgentState
 	{DoingNothing, SeatingCustomer, GetOrder, TakeOrderToCook, ServeFood, GetCheck, TakeCheckToCustomer, CleanTable, Break};
@@ -39,13 +42,13 @@ public class WaiterAgent extends Agent {
 	public int tablenumber;
 	private HostAgent host;
 	
-	private CashierAgent cashier;
+	private Cashier cashier;
 	
 	private CookAgent cook;
 	
 	public boolean busy = false;
 	
-	private MyCustomers CurrentCustomer = new MyCustomers(new CustomerAgent("Frank"), -1, this);
+	private MyCustomers CurrentCustomer = new MyCustomers(new CustomerAgent("Frank"), -1);
 	
 	private Semaphore atTable = new Semaphore(0,true);
 	private Semaphore atCook = new Semaphore(0,true);
@@ -61,7 +64,7 @@ public class WaiterAgent extends Agent {
 		this.name = name;
 	}
 	
-	public void SetCashier(CashierAgent a) {
+	public void SetCashier(Cashier a) {
 		this.cashier = a;
 	}
 	
@@ -82,7 +85,7 @@ public class WaiterAgent extends Agent {
 	}
 	// Messages
 	
-	public void msgOutOfHere(CustomerAgent c) {
+	public void msgOutOfHere(Customer c) {
 		//print("Get here?");
 		for (int i=0;i<myCustomers.size();i++) {
 			if (myCustomers.get(i).getCustomer()==c) {
@@ -96,7 +99,7 @@ public class WaiterAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void msgCheckPlease(CustomerAgent cust) {
+	public void msgCheckPlease(Customer cust) {
 		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getCustomer() == cust) myCustomer.setState(CustState.NeedCheck);
 		}
@@ -105,7 +108,7 @@ public class WaiterAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void msgHereIsCheck(CustomerAgent cust, Check check) {
+	public void msgHereIsCheck(Customer cust, Check check) {
 		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getCustomer() == cust) myCustomer.setCheck(check);
 		}
@@ -119,7 +122,7 @@ public class WaiterAgent extends Agent {
 		//stateChanged();
 	}
 	
-	public void msgGetNewOrder(CustomerAgent cust) {
+	public void msgGetNewOrder(Customer cust) {
 		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getCustomer() == cust) myCustomer.setState(CustState.NewOrderNeeded);
 		}
@@ -128,17 +131,17 @@ public class WaiterAgent extends Agent {
 		stateChanged();
 	}
 
-	public void msgNewCustomerToSeat(CustomerAgent cust, int table){
+	public void msgNewCustomerToSeat(Customer cust, int table){
 		event = Event.NewCustomerToSeat;
 		allEvents.add(event);
-		CurrentCustomer= new MyCustomers(cust,table, this);
+		CurrentCustomer= new MyCustomers(cust,table);
 		CurrentCustomer.setState(CustState.Seating);
 		myCustomers.add(CurrentCustomer);
 		tablenumber=table;
 		stateChanged();
 	}
 
-	public void msgLeavingTable(CustomerAgent cust) {
+	public void msgLeavingTable(Customer cust) {
 		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getCustomer() == cust) {
 				myCustomer.setState(CustState.Done);
@@ -156,7 +159,7 @@ public class WaiterAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void msgReadyToOrder(CustomerAgent cust) {
+	public void msgReadyToOrder(Customer cust) {
 		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getCustomer() == cust) myCustomer.setState(CustState.ReadyToOrder);
 		}
@@ -166,7 +169,7 @@ public class WaiterAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void msgOrderFood(CustomerAgent cust, String food) {
+	public void msgOrderFood(Customer cust, String food) {
 		//print("test "+ this.state);
 		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getCustomer() == cust) {
@@ -479,7 +482,7 @@ public class WaiterAgent extends Agent {
 		}
 		print("Getting check for " + CurrentCustomer.getCustomer());
 
-		cashier.msgCheckPlease(CurrentCustomer);
+		cashier.msgCheckPlease(CurrentCustomer.getCustomer(), CurrentCustomer.getTableNumber(), CurrentCustomer.GetBill());
 		stateChanged();
 	}
 	
@@ -534,7 +537,7 @@ public class WaiterAgent extends Agent {
 	}
 
 	// The animation DoXYZ() routines
-	private void DoSeatCustomer(CustomerAgent customer, int table) {
+	private void DoSeatCustomer(Customer customer, int table) {
 		//Notice how we print "customer" directly. It's toString method will do it.
 		//Same with "table"
 		print("Seating " + customer + " at table " + table + ".  Here is a menu.");
@@ -750,19 +753,19 @@ public class WaiterAgent extends Agent {
 	}
 	
 	public class MyCustomers {
-		CustomerAgent customer;
+		Customer customer;
 		int tableNumber;
 		String order;
 		CustState currentState;
-		WaiterAgent waiter;
+		Waiter waiter;
 		double bill;
 		Check CheckRepublic;
 		boolean owed;
 
-		MyCustomers(CustomerAgent customer, int tableNumber, WaiterAgent w) {
+		public MyCustomers(Customer customer, int tableNumber) {
 			this.tableNumber = tableNumber;
 			this.customer = customer;
-			this.waiter = w;
+			this.waiter = customer.GetWaiter();
 			owed = false;
 		}
 		
@@ -811,15 +814,15 @@ public class WaiterAgent extends Agent {
 			return order;
 		}
 		
-		WaiterAgent getWaiter() {
+		Waiter getWaiter() {
 			return waiter;
 		}
 
-		void setCustomer(CustomerAgent cust) {
+		void setCustomer(Customer cust) {
 			customer = cust;
 		}
 
-		CustomerAgent getCustomer() {
+		Customer getCustomer() {
 			return customer;
 		}
 	}

@@ -6,6 +6,7 @@ import restaurant.HostAgent;
 import restaurant.MarketAgent;
 import restaurant.WaiterAgent;
 import restaurant.CookAgent;
+import restaurant.interfaces.Waiter;
 
 import javax.swing.*;
 
@@ -110,7 +111,7 @@ public class RestaurantPanel extends JPanel {
         restLabel.add(new JLabel("               "), BorderLayout.WEST);
     }
     
-    public void OnBreak(WaiterAgent w) {
+    public void OnBreak(Waiter w) {
     	WaiterAgent temp = new WaiterAgent("Ted");
         for (int i = 0; i < waiters.size(); i++) {
         	temp=waiters.get(i);
