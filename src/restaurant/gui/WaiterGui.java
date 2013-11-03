@@ -18,7 +18,9 @@ public class WaiterGui implements Gui {
 
     private int xPos = -20, yPos = -20;//default waiter position
     private int xDestination = -20, yDestination = -20;//default start position
+    private int xHome = -20, yHome = -20;
     private int shifttwenty = 20;
+    private int xWait  = -20, yWait = -20;
 
     public static final int xTable1 = 200;
     public static final int yTable1 = 250;
@@ -36,6 +38,13 @@ public class WaiterGui implements Gui {
         this.agent = agent;
     }
     
+    
+    public void setHomePosition(int x, int y) {
+    	xHome=x;
+    	yHome=y;
+    	xDestination = xHome;
+    	yDestination = yHome;
+    }
     
     public void updatePosition() {
         if (xPos < xDestination)
@@ -61,8 +70,12 @@ public class WaiterGui implements Gui {
            agent.msgAtTable();
         }
         else if (xPos == xDestination && yPos == yDestination
-        		&& (xDestination ==-shifttwenty) && (yDestination == - shifttwenty)) {
+        		&& (xDestination == xHome) && (yDestination == yHome)) {
            agent.msgAtFront();
+        }
+        else if (xPos == xDestination && yPos == yDestination
+        		&& (xDestination == xWait) && (yDestination == yWait)) {
+           agent.msgAtCust();
         }
         else if (xPos == xDestination && yPos == yDestination
         		& (xDestination == cookX) & (yDestination == cookY)) {
@@ -116,6 +129,11 @@ public class WaiterGui implements Gui {
             customer.getGui().msgGoToXY(xTable3,yTable3);
 
         }
+    }
+    
+    public void DoGoToFront() {
+    	xDestination = -20;
+    	yDestination = -20;
     }
     
     public void DoGoToTable(Customer customer, int n) {
@@ -176,8 +194,8 @@ public class WaiterGui implements Gui {
 
     public void DoLeaveCustomer() {
     	OrderState=orderState.noOrder;
-        xDestination = -shifttwenty;
-        yDestination = -shifttwenty;
+        xDestination = xHome;
+        yDestination = yHome;
     }
 
     public int getXPos() {

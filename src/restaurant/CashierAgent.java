@@ -4,10 +4,12 @@ import agent.Agent;
 import restaurant.gui.HostGui;
 import restaurant.interfaces.Cashier;
 import restaurant.interfaces.Customer;
+import restaurant.interfaces.Market;
 import restaurant.interfaces.Waiter;
 import restaurant.HostAgent;
 import restaurant.WaiterAgent.CustState;
 import restaurant.WaiterAgent.MyCustomers;
+import restaurant.MarketAgent;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -19,6 +21,8 @@ public class CashierAgent extends Agent implements Cashier{
 	private String name;
 	HostAgent host;
 	
+	private double CASHMONEY = 50;
+	
 	public CashierAgent(String name) {
 		super();
 
@@ -27,6 +31,13 @@ public class CashierAgent extends Agent implements Cashier{
 	
 	public List<DebtedCustomers> Customers
 	= new ArrayList<DebtedCustomers>();
+	
+	public List<MarketBills> Markets
+	= new ArrayList<MarketBills>();
+	
+	public void addMarket(Market m) {
+		Markets.add(new MarketBills(m));
+	}
 	
 	public void addCustomer(DebtedCustomers c) {
 		Customers.add(c);
@@ -41,6 +52,7 @@ public class CashierAgent extends Agent implements Cashier{
 		return name;
 	}
 	
+	
 	//public enum PayState {payed, owed, other
 
 	public String getName() {
@@ -48,6 +60,15 @@ public class CashierAgent extends Agent implements Cashier{
 	}
 
 	// Messages
+	
+	public void msgFoodBill(Market m, double b) {
+		for (MarketBills market : Markets) {
+			if (market.GetMarket() == m) {
+				market.SetBill(b);
+			}
+		}
+		stateChanged();
+	}
 	
 	@Override
 	public void msgCheckPlease(Customer C, int TableNumber, double b){
@@ -64,9 +85,9 @@ public class CashierAgent extends Agent implements Cashier{
 	}
 	
 	@Override
-	public void msgPayingMyBill(Customer c) {
+	public void msgPayingMyBill(Customer c, double b) {
 		print (c + " has payed");
-		
+		CASHMONEY = CASHMONEY + b;
 	}
 	
 	/**
@@ -82,8 +103,14 @@ public class CashierAgent extends Agent implements Cashier{
 					return true;
 				}
 			}
-			
-			return false;
+		}
+		
+		for (MarketBills market : Markets) {
+			if (market.GetBill() != 0.00) {
+				market.GetMarket().msgPayingBill(market.GetBill());
+				CASHMONEY = CASHMONEY = market.GetBill();
+				market.SetBill(0.00);
+			}
 		}
 
 		return false;
@@ -117,6 +144,29 @@ public class CashierAgent extends Agent implements Cashier{
 		double GetBill() {
 			return bill;
 		}
+	}
+	
+	public class MarketBills {
+		Market market;
+		double owed;
+		
+		
+		public MarketBills (Market m) {
+			market = m;
+		}
+		
+		public Market GetMarket() {
+			return market;
+		}
+		
+		public void SetBill(double b) {
+			owed = b;
+		}
+		
+		public double GetBill() {
+			return owed;
+		}
+		
 	}
 	
 	public class DebtedCustomers {

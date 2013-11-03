@@ -17,8 +17,10 @@ public interface Cashier {
 	 */
 	EventLog log = new EventLog();
 	
+	public abstract void msgFoodBill(Market m, double b);
+	
 	public abstract void msgCheckPlease(Customer C, int TableNumber, double b);
 	
-	public abstract void msgPayingMyBill(Customer c);
+	public abstract void msgPayingMyBill(Customer c, double b);
 
 }

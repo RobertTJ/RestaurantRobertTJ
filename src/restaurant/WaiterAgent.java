@@ -40,6 +40,7 @@ public class WaiterAgent extends Agent implements Waiter{
 	private List<Event> allEvents = new ArrayList<Event>();
 
 	public int tablenumber;
+	private int xHome, yHome;
 	private HostAgent host;
 	
 	private Cashier cashier;
@@ -51,6 +52,7 @@ public class WaiterAgent extends Agent implements Waiter{
 	private MyCustomers CurrentCustomer = new MyCustomers(new CustomerAgent("Frank"), -1);
 	
 	private Semaphore atTable = new Semaphore(0,true);
+	private Semaphore atFront = new Semaphore (0, true);
 	private Semaphore atCook = new Semaphore(0,true);
 	String name;
 	
@@ -60,8 +62,14 @@ public class WaiterAgent extends Agent implements Waiter{
 	
 	public WaiterAgent(String name) {
 		super();
-		
 		this.name = name;
+	}
+	
+	public void SetHomePosition(int x, int y) {
+		waiterGui.setHomePosition(x, y);
+		xHome = x;
+		yHome = y;
+		stateChanged();
 	}
 	
 	public void SetCashier(Cashier a) {
@@ -193,6 +201,11 @@ public class WaiterAgent extends Agent implements Waiter{
 		//working.release();
 		stateChanged();
 
+	}
+	
+	public void msgAtCust() {
+		atFront.release();
+		stateChanged();
 	}
 	
 	public void msgAtCook(){
@@ -514,6 +527,16 @@ public class WaiterAgent extends Agent implements Waiter{
 	}
 
 	private void seatCustomer() {
+		waiterGui.DoGoToFront();
+		try {
+			atFront.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		busy=true;
+		this.state=AgentState.SeatingCustomer;
+		
 		for (MyCustomers myCustomer : myCustomers) {
 			if (myCustomer.getState()==CustState.Seating) {
 				myCustomer.setState(CustState.Seated);

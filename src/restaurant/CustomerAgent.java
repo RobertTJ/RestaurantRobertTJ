@@ -227,9 +227,9 @@ public class CustomerAgent extends Agent implements Customer {
 		Do("Going to restaurant");
 		if ( bill != 0.00 && Wallet > bill) {
 			//if money is owed, pay
+			cashier.msgPayingMyBill(this, bill);
 			Wallet = Wallet - bill;
 			bill=0.00;
-			cashier.msgPayingMyBill(this);
 			print("I have $" + Wallet + " left");
 			host.msgIWantFood(this);
 		}
@@ -394,10 +394,11 @@ public class CustomerAgent extends Agent implements Customer {
 	private void leaveTable() {
 		Do("Leaving.");
 		if (Wallet>=bill) {
+			cashier.msgPayingMyBill(this, bill);
 			Wallet = Wallet - bill;
 			bill = 0.00;
 			print("I have $" + Wallet + " left");
-			cashier.msgPayingMyBill(this);
+			
 		}
 		waiter.msgLeavingTable(this);
 		customerGui.DoExitRestaurant();

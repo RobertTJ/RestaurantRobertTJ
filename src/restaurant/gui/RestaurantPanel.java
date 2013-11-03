@@ -32,7 +32,7 @@ public class RestaurantPanel extends JPanel {
     private CookAgent cook = new CookAgent("Tim");
 
 
-    
+    private int xHome = 250, yHome = 40;
 
     private Vector<CustomerAgent> customers = new Vector<CustomerAgent>();
     private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
@@ -64,17 +64,22 @@ public class RestaurantPanel extends JPanel {
         
         market1.startThread();
         market1.SetCook(cook);
+        market1.SetCashier(cashier);
         
         market2.startThread();
         market2.SetCook(cook);
+        market2.SetCashier(cashier);
 
         market3.startThread();
         market3.SetCook(cook);
+        market3.SetCashier(cashier);
 
         cook.AddMarket(market1);
         cook.AddMarket(market2);
         cook.AddMarket(market3);
-        
+        cashier.addMarket(market1);
+        cashier.addMarket(market2);
+        cashier.addMarket(market3);
         
         //gui.animationPanel.addGui(hostGui);
         host.startThread();
@@ -214,6 +219,12 @@ public class RestaurantPanel extends JPanel {
     		WaiterGui wg = new WaiterGui(w);
     		
     		w.setGui(wg);
+    		w.SetHomePosition(xHome, yHome);
+    		xHome = xHome + 30;
+    		if (xHome>600) {
+    			xHome = 250;
+    			yHome = yHome + 30;
+    		}
     	    host.msgNewWaiter(w);
 
     	    w.SetHost (host);

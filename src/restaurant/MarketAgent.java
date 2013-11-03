@@ -6,6 +6,8 @@ import restaurant.HostAgent;
 //import restaurant.CookAgent.Order;
 
 import restaurant.CustomerAgent.AgentEvent;
+import restaurant.interfaces.Cashier;
+import restaurant.interfaces.Market;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -14,13 +16,16 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MarketAgent extends Agent {
+public class MarketAgent extends Agent implements Market{
 
 	private String name;
 	
 	HostAgent host;
 	CookAgent cook;
+	Cashier cashier;
 	Timer timer = new Timer();
+	double owed=0.00;
+	boolean BillPending = false;
 
 	public MarketAgent(String name) {
 		super();
@@ -44,6 +49,10 @@ public class MarketAgent extends Agent {
 		this.cook=c;
 	}
 	
+	public void SetCashier(Cashier c) {
+		this.cashier = c;
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -53,6 +62,12 @@ public class MarketAgent extends Agent {
 	 
 
 	// Messages
+	
+	public void msgPayingBill(double b) {
+		owed = owed + b;
+		BillPending = false;
+		stateChanged();
+	}
 	
 	public void msgNewOrders (String order, int amount) {
 		allOrders.add(new Order(amount, order));
@@ -85,11 +100,21 @@ public class MarketAgent extends Agent {
 			}
 			
 		}
+		
+		if (owed != 0.00 && BillPending == false){
+			SendBill();
+			return true;
+		}
 
 		return false;
 	}
 
 	// Actions
+	
+	private void SendBill() {
+		cashier.msgFoodBill(this, owed);
+		stateChanged();
+	}
 	
 	private void FullfillOrder(final Order o) {
 		print("Delivering " + o.getAmount() + " " + o.getOrder().getChoice());
@@ -106,6 +131,15 @@ public class MarketAgent extends Agent {
 			}
 		},
 		8000);
+		if (o.getOrder().getChoice() == "Steak") {
+			owed = o.getAmount() * 9.99;
+		}
+		else if (o.getOrder().getChoice() == "Chicken") {
+			owed = o.getAmount() * 7.99;		}
+		else if (o.getOrder().getChoice() == "Salad") {
+			owed = o.getAmount() * 2.99;		}
+		else {
+			owed = o.getAmount() * 5.99;		}
 	}
 	
 	/*private void FullfillOrder(Order o) {
@@ -115,6 +149,7 @@ public class MarketAgent extends Agent {
 	}*/
 	
 	private void CanNotFullfillOrder(final Order o) {
+		final int thisorder = inventory.GetAmountOf(o.getOrder().getChoice());
 		print("Delivering " + inventory.GetAmountOf(o.getOrder().getChoice()) + " " + o.getOrder().getChoice());
 		inventory.OrderAmount(o.getOrder().getChoice(), inventory.GetAmountOf(o.getOrder().getChoice()));
 		
@@ -124,12 +159,21 @@ public class MarketAgent extends Agent {
 			Object cookie = 1;
 			public void run() {
 				cook.msgCanNotFullfillOrder(o.getOrder().getChoice(), o.getAmount(), inventory.GetAmountOf(o.getOrder().getChoice()), getMarketAgent());
-				print("Delivererd " + o.getAmount() + " " + o.getOrder().getChoice());
+				print("Delivererd " + thisorder + " " + o.getOrder().getChoice());
 				print("Out of " + o.getOrder().getChoice());
 				stateChanged();
 			}
 		},
 		8000);
+		if (o.getOrder().getChoice() == "Steak") {
+			owed = thisorder * 9.99;
+		}
+		else if (o.getOrder().getChoice() == "Chicken") {
+			owed = thisorder * 7.99;		}
+		else if (o.getOrder().getChoice() == "Salad") {
+			owed = thisorder * 2.99;		}
+		else {
+			owed = thisorder * 5.99;		}
 	}
 	
 	// Classes
