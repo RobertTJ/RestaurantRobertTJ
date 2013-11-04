@@ -251,6 +251,8 @@ public class WaiterAgent extends Agent implements Waiter{
 	protected boolean pickAndExecuteAnAction() {
 		
 		
+		try{
+		
 		//if (currentEvent)
 		for (Event pendingEvents : allEvents) {
 			if (pendingEvents == Event.TakeABreak) {
@@ -478,6 +480,10 @@ public class WaiterAgent extends Agent implements Waiter{
 		
 
 		return false;
+		} catch(ConcurrentModificationException e) {
+			// TODO Auto-generated catch block
+			return false;
+		}
 		//we have tried all our rules and found
 		//nothing to do. So return false to main loop of abstract agent
 		//and wait.

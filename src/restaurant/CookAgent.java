@@ -33,6 +33,7 @@ public class CookAgent extends Agent {
 	public enum CookState {pending, cooking, done, out, outoffood};
 	Timer timer = new Timer();
 	
+	
 	CookGui gui= null;
 
 	public CookAgent(String name) {
@@ -48,17 +49,18 @@ public class CookAgent extends Agent {
 	}
 
 	public List<Order> allOrders
-	= new ArrayList<Order>();
+	= Collections.synchronizedList(new ArrayList<Order>());
 	
 	public List<WaiterAgent> Waiters
-	= new ArrayList<WaiterAgent>();
+	= Collections.synchronizedList(new ArrayList<WaiterAgent>());
 	
 	public List<MarketAgent> Markets
-	= new ArrayList<MarketAgent>();
-	public List<Boolean> OutOfBeef = new ArrayList<Boolean>();
-	public List<Boolean> OutOfChicken = new ArrayList<Boolean>();
-	public List<Boolean> OutOfPizza = new ArrayList<Boolean>();
-	public List<Boolean> OutOfSalad = new ArrayList<Boolean>();
+	= Collections.synchronizedList(new ArrayList<MarketAgent>());
+	
+	public List<Boolean> OutOfBeef = Collections.synchronizedList(new ArrayList<Boolean>());
+	public List<Boolean> OutOfChicken = Collections.synchronizedList(new ArrayList<Boolean>());
+	public List<Boolean> OutOfPizza = Collections.synchronizedList(new ArrayList<Boolean>());
+	public List<Boolean> OutOfSalad = Collections.synchronizedList(new ArrayList<Boolean>());
 	boolean orderedSteak=false;
 	boolean orderedChicken=false;
 	boolean orderedPizza=false;
@@ -150,6 +152,7 @@ public class CookAgent extends Agent {
 			orderedSalad=false;
 		}
 		
+		synchronized(Markets) {
 		for (int i = 0; i < Markets.size(); i++) {
 			if (m == Markets.get(i)) {
 				if (food == "Steak") {
@@ -170,6 +173,7 @@ public class CookAgent extends Agent {
 				}
 			}
 		}
+		}
 		stateChanged();
 	}
 
@@ -179,7 +183,7 @@ public class CookAgent extends Agent {
 	 */
 	protected boolean pickAndExecuteAnAction() {
 	
-		
+		synchronized(allOrders) {
 		for (Order order : allOrders){
 			if(order.state==CookState.done) {
 				gui.DoGoToGrill();
@@ -202,6 +206,7 @@ public class CookAgent extends Agent {
 				return true;
 			}
 		}
+		}
 		
 		if (PayingAttention==true && Markets.isEmpty()==false) {
 			if (inventory.GetAmountOf("Steak") <= 1 && orderedSteak==false) {
@@ -222,6 +227,7 @@ public class CookAgent extends Agent {
 			}
 		}
 		
+		synchronized(allOrders) {
 		for (Order order : allOrders){
 			if(order.state==CookState.pending && inventory.GetAmountOf(order.order.getChoice()) == 0) {
 				print("Out of " + order.order.getChoice());
@@ -231,7 +237,9 @@ public class CookAgent extends Agent {
 				return true;
 			}
 		}
+		}
 		
+		synchronized(allOrders){
 		for (Order order : allOrders){
 			if(order.state==CookState.pending && inventory.GetAmountOf(order.order.getChoice()) > 0) {
 				gui.DoGoToFridge();
@@ -255,6 +263,7 @@ public class CookAgent extends Agent {
 				return true;
 			}
 		}
+		}
 
 		return false;
 	}
@@ -263,6 +272,7 @@ public class CookAgent extends Agent {
 	private void GetMoreFood(Order o) {
 		o.getWaiter().msgGetNewOrder(o.getCustomer());
 		
+		synchronized(Markets) {
 		for (int i=0;i<Markets.size();i++){
 			if(o.getOrder().getChoice() == "Steak" && OutOfBeef.get(i)==false && orderedSteak==false) {
 				orderedSteak=true;
@@ -286,12 +296,13 @@ public class CookAgent extends Agent {
 			}
 			
 		}
+		}
 		
 		stateChanged();
 	}
 	
 	private void Restock(String type) {
-		
+		synchronized(Markets) {
 		for (int i=0;i<Markets.size();i++){
 			if(type == "Steak" && OutOfBeef.get(i)==false && orderedSteak==false) {
 				Markets.get(i).msgNewOrders(type, 3);	
@@ -314,6 +325,7 @@ public class CookAgent extends Agent {
 				break;
 			}
 			
+		}
 		}
 		
 		stateChanged();

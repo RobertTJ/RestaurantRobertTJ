@@ -58,7 +58,7 @@ public class MarketAgent extends Agent implements Market{
 	}
 	
 	public List<Order> allOrders
-	= new ArrayList<Order>();
+	= Collections.synchronizedList(new ArrayList<Order>());
 	 
 
 	// Messages
@@ -84,7 +84,7 @@ public class MarketAgent extends Agent implements Market{
             so that table is unoccupied and customer is waiting.
             If so seat him at the table.
 		 */
-		
+		synchronized(allOrders){
 		for (Order order : allOrders){
 			if (order.getAmount() < inventory.GetAmountOf(order.getOrder().getChoice())) {
 				//print("order:" + order.getAmount() + " vs " + inventory.GetAmountOf(order.getOrder().getChoice()));
@@ -99,6 +99,7 @@ public class MarketAgent extends Agent implements Market{
 				return true;
 			}
 			
+		}
 		}
 		
 		if (owed != 0.00 && BillPending == false){
@@ -149,9 +150,8 @@ public class MarketAgent extends Agent implements Market{
 	}*/
 	
 	private void CanNotFullfillOrder(final Order o) {
-		final int thisorder = inventory.GetAmountOf(o.getOrder().getChoice());
+		int thisorder = inventory.GetAmountOf(o.getOrder().getChoice());
 		print("Delivering " + inventory.GetAmountOf(o.getOrder().getChoice()) + " " + o.getOrder().getChoice());
-		inventory.OrderAmount(o.getOrder().getChoice(), inventory.GetAmountOf(o.getOrder().getChoice()));
 		
 		allOrders.remove(o);
 
@@ -159,8 +159,10 @@ public class MarketAgent extends Agent implements Market{
 			Object cookie = 1;
 			public void run() {
 				cook.msgCanNotFullfillOrder(o.getOrder().getChoice(), o.getAmount(), inventory.GetAmountOf(o.getOrder().getChoice()), getMarketAgent());
-				print("Delivererd " + thisorder + " " + o.getOrder().getChoice());
+				print("Delivererd " + inventory.GetAmountOf(o.getOrder().getChoice()) + " " + o.getOrder().getChoice());
 				print("Out of " + o.getOrder().getChoice());
+				inventory.OrderAmount(o.getOrder().getChoice(), inventory.GetAmountOf(o.getOrder().getChoice()));
+
 				stateChanged();
 			}
 		},

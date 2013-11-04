@@ -30,10 +30,10 @@ public class CashierAgent extends Agent implements Cashier{
 	}
 	
 	public List<DebtedCustomers> Customers
-	= new ArrayList<DebtedCustomers>();
+	= Collections.synchronizedList(new ArrayList<DebtedCustomers>());
 	
 	public List<MarketBills> Markets
-	= new ArrayList<MarketBills>();
+	= Collections.synchronizedList(new ArrayList<MarketBills>());
 	
 	public void addMarket(Market m) {
 		Markets.add(new MarketBills(m));
@@ -62,10 +62,13 @@ public class CashierAgent extends Agent implements Cashier{
 	// Messages
 	
 	public void msgFoodBill(Market m, double b) {
+		synchronized(Markets) {
+			
 		for (MarketBills market : Markets) {
 			if (market.GetMarket() == m) {
 				market.SetBill(b);
 			}
+		}
 		}
 		stateChanged();
 	}
@@ -73,12 +76,14 @@ public class CashierAgent extends Agent implements Cashier{
 	@Override
 	public void msgCheckPlease(Customer C, int TableNumber, double b){
 		boolean herebefore = false;
+		synchronized(Customers) {
 		for (DebtedCustomers cust : Customers) {
 			if (cust.getCustomer() == C) {
 				cust.setOwed(false);
 				//cust.
 				herebefore=true;
 			}
+		}
 		}
 		if (herebefore==false) Customers.add(new DebtedCustomers(C,TableNumber,b));
 		stateChanged();
@@ -96,6 +101,7 @@ public class CashierAgent extends Agent implements Cashier{
 	protected boolean pickAndExecuteAnAction() {
 	
 		if(!Customers.isEmpty()) {
+			synchronized(Customers) {
 			for (DebtedCustomers cust : Customers) {
 				if (cust.getOwed()==false) {
 					GiveBillToWaiter(cust);
@@ -103,14 +109,16 @@ public class CashierAgent extends Agent implements Cashier{
 					return true;
 				}
 			}
+			}
 		}
-		
+		synchronized(Markets){
 		for (MarketBills market : Markets) {
 			if (market.GetBill() != 0.00) {
 				market.GetMarket().msgPayingBill(market.GetBill());
 				CASHMONEY = CASHMONEY = market.GetBill();
 				market.SetBill(0.00);
 			}
+		}
 		}
 
 		return false;
@@ -123,10 +131,12 @@ public class CashierAgent extends Agent implements Cashier{
 		print("Here is the check for " + CurrentCustomer.getCustomer());
 		Check ThisCheck = new Check(CurrentCustomer.GetBill());
 		CurrentCustomer.getWaiter().msgHereIsCheck(CurrentCustomer.getCustomer(), ThisCheck);
+		synchronized(Customers) {
 		for (int i=0;i<Customers.size();i++) {
 			if (Customers.get(i) == CurrentCustomer) {
 				Customers.remove(i);
 			}
+		}
 		}
 		stateChanged();
 	}
