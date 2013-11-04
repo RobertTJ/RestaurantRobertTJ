@@ -4,6 +4,7 @@ import agent.Agent;
 import restaurant.gui.HostGui;
 import restaurant.interfaces.Cashier;
 import restaurant.interfaces.Customer;
+import restaurant.interfaces.Host;
 import restaurant.interfaces.Market;
 import restaurant.interfaces.Waiter;
 import restaurant.HostAgent;
@@ -19,7 +20,7 @@ import java.util.TimerTask;
 public class CashierAgent extends Agent implements Cashier{
 
 	private String name;
-	HostAgent host;
+	Host host;
 	
 	private double CASHMONEY = 50;
 	
@@ -44,7 +45,7 @@ public class CashierAgent extends Agent implements Cashier{
 		stateChanged();
 	}
 	
-	public void SetHost(HostAgent h) {
+	public void SetHost(Host h) {
 		this.host=h;
 	}
 	

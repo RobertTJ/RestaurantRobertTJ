@@ -7,6 +7,7 @@ import restaurant.gui.CustomerGui;
 import restaurant.gui.RestaurantGui;
 import restaurant.interfaces.Cashier;
 import restaurant.interfaces.Customer;
+import restaurant.interfaces.Host;
 import restaurant.interfaces.Waiter;
 import agent.Agent;
 
@@ -32,7 +33,7 @@ public class CustomerAgent extends Agent implements Customer {
 	private Semaphore atWait = new Semaphore(0,true);
 
 	// agent correspondents
-	private HostAgent host;
+	private Host host;
 	private Waiter waiter = null;
 	private Cashier cashier;
 	int select;
@@ -69,7 +70,7 @@ public class CustomerAgent extends Agent implements Customer {
 		yWait = y;
 	}
 	
-	public void setHost(HostAgent host) {
+	public void setHost(Host host) {
 		this.host = host;
 	}
 	

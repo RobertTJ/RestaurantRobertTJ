@@ -5,6 +5,7 @@ import restaurant.CustomerAgent.AgentState;
 import restaurant.gui.HostGui;
 import restaurant.gui.RestaurantGui;
 import restaurant.interfaces.Customer;
+import restaurant.interfaces.Host;
 import restaurant.interfaces.Waiter;
 
 import java.util.*;
@@ -17,7 +18,7 @@ import java.util.concurrent.Semaphore;
 //does all the rest. Rather than calling the other agent a waiter, we called him
 //the HostAgent. A Host is the manager of a restaurant who sees that all
 //is proceeded as he wishes.
-public class HostAgent extends Agent {
+public class HostAgent extends Agent implements Host{
 	static final int NTABLES = 3;//a global for the number of tables.
 	//Notice that we implement waitingCustomers using ArrayList, but type it
 	//with List semantics.
@@ -267,7 +268,7 @@ public class HostAgent extends Agent {
 		return hostGui;
 	}
 	
-	private class MyWaiters {
+	public class MyWaiters {
 		Waiter waiter;
 		boolean WantABreak;
 		boolean OnBreak;
@@ -319,7 +320,7 @@ public class HostAgent extends Agent {
 	}
 	
 
-	private class Table {
+	public class Table {
 		Customer occupiedBy;
 		int tableNumber;
 

@@ -15,6 +15,8 @@ import restaurant.WaiterAgent.MyCustomers;
  */
 public interface Market {
 	public abstract void msgPayingBill (double b);
+
+	public abstract void msgNewOrders(String type, int i);
 	
 }
 

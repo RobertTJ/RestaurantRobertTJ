@@ -7,6 +7,8 @@ import restaurant.HostAgent;
 
 import restaurant.CustomerAgent.AgentEvent;
 import restaurant.interfaces.Cashier;
+import restaurant.interfaces.Cook;
+import restaurant.interfaces.Host;
 import restaurant.interfaces.Market;
 
 import java.util.*;
@@ -20,8 +22,8 @@ public class MarketAgent extends Agent implements Market{
 
 	private String name;
 	
-	HostAgent host;
-	CookAgent cook;
+	Host host;
+	Cook cook;
 	Cashier cashier;
 	Timer timer = new Timer();
 	double owed=0.00;
@@ -40,12 +42,12 @@ public class MarketAgent extends Agent implements Market{
 	
 	Inventory inventory = new Inventory();
 	
-	public void SetHost(HostAgent h) {
+	public void SetHost(Host h) {
 		this.host=h;
 		stateChanged();
 	}
 	
-	public void SetCook(CookAgent c) {
+	public void SetCook(Cook c) {
 		this.cook=c;
 	}
 	

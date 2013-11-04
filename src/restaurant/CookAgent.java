@@ -3,6 +3,13 @@ package restaurant;
 import agent.Agent;
 import restaurant.gui.CookGui;
 import restaurant.HostAgent;
+import restaurant.interfaces.Cook;
+
+
+import restaurant.interfaces.Customer;
+import restaurant.interfaces.Host;
+import restaurant.interfaces.Market;
+import restaurant.interfaces.Waiter;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -16,11 +23,11 @@ import java.util.TimerTask;
 //does all the rest. Rather than calling the other agent a waiter, we called him
 //the HostAgent. A Host is the manager of a restaurant who sees that all
 //is proceeded as he wishes.
-public class CookAgent extends Agent {
+public class CookAgent extends Agent implements Cook{
 
 	private String name;
 	//List<Order> orders= new <ListArray>Order();
-	HostAgent host;
+	Host host;
 	
 	boolean PayingAttention = true;
 	private Semaphore atFridge = new Semaphore(0,true);
@@ -51,11 +58,11 @@ public class CookAgent extends Agent {
 	public List<Order> allOrders
 	= Collections.synchronizedList(new ArrayList<Order>());
 	
-	public List<WaiterAgent> Waiters
-	= Collections.synchronizedList(new ArrayList<WaiterAgent>());
+	public List<Waiter> Waiters
+	= Collections.synchronizedList(new ArrayList<Waiter>());
 	
-	public List<MarketAgent> Markets
-	= Collections.synchronizedList(new ArrayList<MarketAgent>());
+	public List<Market> Markets
+	= Collections.synchronizedList(new ArrayList<Market>());
 	
 	public List<Boolean> OutOfBeef = Collections.synchronizedList(new ArrayList<Boolean>());
 	public List<Boolean> OutOfChicken = Collections.synchronizedList(new ArrayList<Boolean>());
@@ -69,7 +76,7 @@ public class CookAgent extends Agent {
 	
 	Inventory inventory = new Inventory();
 	
-	public void AddMarket(MarketAgent m) {
+	public void AddMarket(Market m) {
 		Markets.add(m);
 		OutOfBeef.add(false); //hack, get info from markets
 		OutOfChicken.add(false);
@@ -78,7 +85,7 @@ public class CookAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void SetHost(HostAgent h) {
+	public void SetHost(Host h) {
 		this.host=h;
 		stateChanged();
 	}
@@ -96,27 +103,27 @@ public class CookAgent extends Agent {
 	}
 
 	// Messages
-	
+	@Override
 	public void msgAtCounter() {
 		atCounter.release();
 		stateChanged();
 	}
-	
+	@Override
 	public void msgAtGrill() {
 		atGrill.release();
 		stateChanged();
 	}
-	
+	@Override
 	public void msgAtFridge() {
 		atFridge.release();
 		stateChanged();
 	}
-	
-	public void msgNewOrder(WaiterAgent waiter, int table, String order) {
+	@Override
+	public void msgNewOrder(Waiter waiter, int table, String order) {
 		allOrders.add(new Order(waiter,table, order));
 		stateChanged();
 	}
-	
+	@Override
 	public void msgOrderFullfilled(String food, int amount) {
 		
 		if (food == "Steak") {
@@ -136,7 +143,7 @@ public class CookAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void msgCanNotFullfillOrder(String food, int amount, int available, MarketAgent m) {
+	public void msgCanNotFullfillOrder(String food, int amount, int available, Market m) {
 		if (available > 0) inventory.AddMore(food, available);
 
 		if (food == "Steak") {
@@ -452,17 +459,17 @@ public class CookAgent extends Agent {
 		}
 	}
 	
-	private class Order {
-		WaiterAgent waiter;
+	public class Order {
+		Waiter waiter;
 		//String choice;
 		int table;
-		CustomerAgent customer;
+		Customer customer;
 		CookState state;
 		Food order;
 		
 		
 		
-		Order(WaiterAgent Waiter, int tableNumber, String o) {
+		Order(Waiter Waiter, int tableNumber, String o) {
 			this.table = tableNumber;
 			this.waiter = Waiter;
 			this.order=new Food(o);
@@ -506,19 +513,19 @@ public class CookAgent extends Agent {
 			return order;
 		}
 
-		void setCustomer(CustomerAgent cust) {
+		void setCustomer(Customer cust) {
 			customer = cust;
 		}
 
-		CustomerAgent getCustomer() {
+		Customer getCustomer() {
 			return customer;
 		}
 		
-		void setWaiter(WaiterAgent w) {
+		void setWaiter(Waiter w) {
 			waiter = w;
 		}
 
-		WaiterAgent getWaiter() {
+		Waiter getWaiter() {
 			return waiter;
 		}
 		

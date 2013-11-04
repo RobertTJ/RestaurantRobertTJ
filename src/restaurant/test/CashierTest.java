@@ -8,14 +8,7 @@ import restaurant.test.mock.MockCustomer;
 import restaurant.test.mock.MockWaiter;
 import junit.framework.*;
 
-/**
- * 
- * This class is a JUnit test class to unit test the CashierAgent's basic interaction
- * with waiters, customers, and the host.
- * It is provided as an example to students in CS201 for their unit testing lab.
- *
- * @author Monroe Ekilah
- */
+
 public class CashierTest extends TestCase
 {
 	//these are instantiated for each test separately via the setUp() method.
