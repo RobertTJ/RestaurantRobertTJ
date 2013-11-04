@@ -10,8 +10,7 @@
   + [Agent Roadmap](http://www-scf.usc.edu/~csci201/readings/agent-roadmap.html)
 
 ###Compiling Code
-  + Code can be compiled from the RestaurantGui.java file.  Clicking Run in Eclipse while in RestaurantGui.java should 
-  + launch the restaurant similution without any errors.  All requirements were, to the best of my knowledge, met.
+  + Code can be compiled from the RestaurantGui.java file.  Clicking Run in Eclipse while in RestaurantGui.java should launch the restaurant similution without any errors.  All requirements were, to the best of my knowledge, met.
 
 ###GUI Instructions
   + The text field is where the name for any customer and/or waiter is input. Customers are added by clicking the "Add Customer" button, at which point the current text in the text field becomes the new customer's name and his/her initial hunger status is determined by the state of the "Hungry?" checkbox next to the "Add Customer" button: selected to start hungry and unselected to start not hungry.
@@ -27,3 +26,6 @@
 
 ###Design Documents
   +Design documents are in the Design Doc folder in the restaurant_roberttj repository.  They are in PDF/JPG format.
+
+###Unit Testing
+  +Unit testing can be run by clicking Run in Eclipse while in CashierTest.java
