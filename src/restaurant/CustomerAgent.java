@@ -119,8 +119,8 @@ public class CustomerAgent extends Agent implements Customer {
 		}
 	}
 	@Override
-	public void msgHereIsYourBill(Check k) {
-		if (k!= null) bill = k.GetBill();
+	public void msgHereIsYourBill(double k) {
+		bill = k;
 		event = AgentEvent.GotCheck;
 		stateChanged();
 	}

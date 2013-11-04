@@ -24,7 +24,7 @@ public interface Customer {
 	
 	public abstract void msgRestaurantFull();
 	
-	public abstract void msgHereIsYourBill(Check k);
+	public abstract void msgHereIsYourBill(double k);
 	
 	public abstract void msgFollowMeToTable(Waiter w, Menu m);
 

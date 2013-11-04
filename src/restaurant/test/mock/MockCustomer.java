@@ -2,12 +2,14 @@ package restaurant.test.mock;
 
 
 import restaurant.CashierAgent.Check;
+import restaurant.CustomerAgent.AgentState;
 import restaurant.CustomerAgent;
 import restaurant.WaiterAgent.Menu;
 import restaurant.gui.CustomerGui;
 import restaurant.gui.RestaurantGui;
 import restaurant.interfaces.Cashier;
 import restaurant.interfaces.Customer;
+import restaurant.interfaces.Host;
 import restaurant.interfaces.Waiter;
 
 /**
@@ -22,9 +24,21 @@ public class MockCustomer extends Mock implements Customer {
 	 * Reference to the Cashier under test that can be set by the unit test.
 	 */
 	public Cashier cashier;
+	public Host host;
+	public Waiter waiter;
+	public double wallet;
+	public double bill;
+	
+	public void setWaiter(Waiter w) {
+		waiter= w;
+	}
+	
+	public void setHost(Host h) {
+		host =h;
+	}
 	
 	public Waiter GetWaiter() {
-		return null;
+		return waiter;
 		
 	}
 
@@ -45,8 +59,9 @@ public class MockCustomer extends Mock implements Customer {
 		
 	}
 	
-	public  void msgHereIsYourBill(Check k){
-		//cashier.msgPayingMyBill(this);
+	public  void msgHereIsYourBill(double k){
+		cashier.msgPayingMyBill(this, k);
+		wallet=wallet-k;
 	}
 	
 	public  void msgFollowMeToTable(Waiter w, Menu m){
@@ -72,33 +87,27 @@ public class MockCustomer extends Mock implements Customer {
 	public  void msgDeliveredFood(){
 		
 	}
-/*
-	@Override
-	public void HereIsYourTotal(double total) {
-		log.add(new LoggedEvent("Received HereIsYourTotal from cashier. Total = "+ total));
+	
+	public void goToRestaurant() {
+			
+		
 
-		if(this.name.toLowerCase().contains("thief")){
-			//test the non-normative scenario where the customer has no money if their name contains the string "theif"
-			cashier.IAmShort(this, 0);
-
-		}else if (this.name.toLowerCase().contains("rich")){
-			//test the non-normative scenario where the customer overpays if their name contains the string "rich"
-			cashier.HereIsMyPayment(this, Math.ceil(total));
-
-		}else{
-			//test the normative scenario
-			cashier.HereIsMyPayment(this, total);
+		if ( bill != 0.00 && wallet > bill) {
+			//if money is owed, pay
+			cashier.msgPayingMyBill(this, bill);
+			wallet = wallet - bill;
+			bill=0.00;
+			host.msgIWantFood(this);
 		}
+		else if (bill != 0.00 && wallet < bill) {
+			//if money is owed and can't pay
+			//print("I owe the restaurant money, guess I have to wait here");
+			//start timer/dishes stuff
+		}
+		else {
+			host.msgIWantFood(this);//send our instance, so he can respond to us
+		}
+				
 	}
 
-	@Override
-	public void HereIsYourChange(double total) {
-		log.add(new LoggedEvent("Received HereIsYourChange from cashier. Change = "+ total));
-	}
-
-	@Override
-	public void YouOweUs(double remaining_cost) {
-		log.add(new LoggedEvent("Received YouOweUs from cashier. Debt = "+ remaining_cost));
-	}
-*/
 }

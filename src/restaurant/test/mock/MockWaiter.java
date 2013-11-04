@@ -1,8 +1,12 @@
 package restaurant.test.mock;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import restaurant.CustomerAgent;
 import restaurant.CashierAgent.Check;
+import restaurant.WaiterAgent.MyCustomers;
 import restaurant.interfaces.Cashier;
 import restaurant.interfaces.Customer;
 import restaurant.interfaces.Waiter;
@@ -15,9 +19,9 @@ import restaurant.interfaces.Waiter;
  */
 public class MockWaiter extends Mock implements Waiter {
 
-	/**
-	 * Reference to the Cashier under test that can be set by the unit test.
-	 */
+	public List<MyCustomers> myCustomers
+	= new ArrayList<MyCustomers>();
+	
 	public Cashier cashier;
 	
 	public Customer customer;
@@ -31,11 +35,11 @@ public class MockWaiter extends Mock implements Waiter {
 	}
 	
 	public  void msgCheckPlease(Customer cust){
-		cashier.msgCheckPlease(customer, 0, 6.99);
+		cashier.msgCheckPlease(cust, 0, 15.99);
 	}
 	
 	public  void msgHereIsCheck(Customer cust, Check check){
-		customer.msgHereIsYourBill(check);
+		cust.msgHereIsYourBill(15.99);
 	}
 	
 	public  void msgCantBreakNow(){

@@ -112,11 +112,11 @@ public String name;
 		
 	cook.msgCanNotFullfillOrder(o.getOrder().getChoice(), o.getAmount(), inventory.GetAmountOf(o.getOrder().getChoice()), this);
 				
-				inventory.OrderAmount(o.getOrder().getChoice(), inventory.GetAmountOf(o.getOrder().getChoice()));
+		inventory.OrderAmount(o.getOrder().getChoice(), inventory.GetAmountOf(o.getOrder().getChoice()));
 
 	
 		if (o.getOrder().getChoice() == "Steak") {
-			owed = 3 * 9.99;
+			owed = thisorder * 9.99;
 		}
 		else if (o.getOrder().getChoice() == "Chicken") {
 			owed = thisorder * 7.99;		}
@@ -154,10 +154,10 @@ public String name;
 	}
 	
 	public class Inventory {
-		int AmountOfChicken;
-		int AmountOfSteak;
-		int AmountOfPizza;
-		int AmountOfSalad;
+		public int AmountOfChicken;
+		public int AmountOfSteak;
+		public int AmountOfPizza;
+		public int AmountOfSalad;
 		
 		public Inventory() {
 			AmountOfChicken = 0;

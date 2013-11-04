@@ -517,7 +517,7 @@ public class WaiterAgent extends Agent implements Waiter{
 		busy=true;
 		this.state=AgentState.TakeCheckToCustomer;
 
-		c.getCustomer().msgHereIsYourBill(c.getCheck());
+		c.getCustomer().msgHereIsYourBill(c.getCheck().GetBill());
 		waiterGui.DoLeaveCustomer();
 	}
 	

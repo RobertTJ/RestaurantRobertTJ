@@ -86,7 +86,8 @@ public class CashierAgent extends Agent implements Cashier{
 			}
 		}
 		}
-		if (herebefore==false) Customers.add(new DebtedCustomers(C,TableNumber,b));
+		//if (herebefore==false)
+			Customers.add(new DebtedCustomers(C,TableNumber,b));
 		stateChanged();
 	}
 	
@@ -126,9 +127,14 @@ public class CashierAgent extends Agent implements Cashier{
 	// Actions
 	
 	public void PayMarket(MarketBills market) {
+		
 		market.GetMarket().msgPayingBill(market.GetBill());
-		CASHMONEY = CASHMONEY = market.GetBill();
+		CASHMONEY = CASHMONEY - market.GetBill();
 		market.SetBill(0.00);
+		if (CASHMONEY < 0.00) {
+			print("We are now terribly in debt to awful people.  If we don't become flush soon we'll be shut down!");
+			
+		}
 	}
 	
 	private void GiveBillToWaiter(DebtedCustomers CurrentCustomer) {
@@ -184,12 +190,12 @@ public class CashierAgent extends Agent implements Cashier{
 	}
 	
 	public class DebtedCustomers {
-		Customer customer;
+		public Customer customer;
 		int tableNumber;
 		String order;
 		CustState currentState;
 		Waiter waiter;
-		double bill;
+		public double bill;
 		Check CheckRepublic;
 		boolean owed;
 
