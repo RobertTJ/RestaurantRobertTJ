@@ -22,7 +22,7 @@ public class CashierAgent extends Agent implements Cashier{
 	private String name;
 	Host host;
 	
-	private double CASHMONEY = 50;
+	public double CASHMONEY = 50;
 	
 	public CashierAgent(String name) {
 		super();
@@ -99,7 +99,7 @@ public class CashierAgent extends Agent implements Cashier{
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
-	protected boolean pickAndExecuteAnAction() {
+	public boolean pickAndExecuteAnAction() {
 	
 		if(!Customers.isEmpty()) {
 			synchronized(Customers) {
@@ -115,9 +115,7 @@ public class CashierAgent extends Agent implements Cashier{
 		synchronized(Markets){
 		for (MarketBills market : Markets) {
 			if (market.GetBill() != 0.00) {
-				market.GetMarket().msgPayingBill(market.GetBill());
-				CASHMONEY = CASHMONEY = market.GetBill();
-				market.SetBill(0.00);
+				PayMarket(market);
 			}
 		}
 		}
@@ -127,6 +125,11 @@ public class CashierAgent extends Agent implements Cashier{
 
 	// Actions
 	
+	public void PayMarket(MarketBills market) {
+		market.GetMarket().msgPayingBill(market.GetBill());
+		CASHMONEY = CASHMONEY = market.GetBill();
+		market.SetBill(0.00);
+	}
 	
 	private void GiveBillToWaiter(DebtedCustomers CurrentCustomer) {
 		print("Here is the check for " + CurrentCustomer.getCustomer());

@@ -4,6 +4,7 @@ import restaurant.CashierAgent;
 import restaurant.WaiterAgent;
 import restaurant.WaiterAgent.MyCustomers;
 import restaurant.MarketAgent;
+import restaurant.test.mock.MockCook;
 import restaurant.test.mock.MockCustomer;
 import restaurant.test.mock.MockMarket;
 import restaurant.test.mock.MockWaiter;
@@ -17,7 +18,9 @@ public class CashierTest extends TestCase
 	MockWaiter waiter;
 	MockCustomer customer;
 	MyCustomers ThisGuy;
-	MockMarket market;
+	MockMarket market1;
+	MockMarket market2;
+	MockCook cook;
 	
 	
 	/**
@@ -29,22 +32,131 @@ public class CashierTest extends TestCase
 		cashier = new CashierAgent("cashier");		
 		customer = new MockCustomer("mockcustomer");		
 		waiter = new MockWaiter("mockwaiter");
-		market = new MockMarket("mockmarket");
+		market1 = new MockMarket("mockmarket1");
+		market2 = new MockMarket("mockmarket2");
+		cook = new MockCook("mockcook");
 	}	
 	/**
 	 * This tests the cashier under very simple terms: one customer is ready to pay the exact bill.
 	 */
-	public void testOneNormalCustomerScenario()
+	public void testOneNormalMarketScenario()
 	{
+		try {
+			setUp();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		customer.cashier = cashier;
-		market.cashier = cashier;
+		market1.cashier = cashier;
+		market2.cashier = cashier;
 		waiter.cashier = cashier;
+		cook.AddMarket(market1);
+		cook.AddMarket(market2);
+		cashier.addMarket(market1);
+		cashier.addMarket(market2);
+		market1.SetCook(cook);
+		market2.SetCook(cook);
+		cashier.CASHMONEY = 100;
 		
+		//assert everything is in default state
 		assertEquals("Cashier should have 0 customers in it. It doesn't.",cashier.Customers.size(), 0);		
-		assertEquals("CashierAgent should have an empty event log before the Cashier's HereIsBill is called. Instead, the Cashier's event log reads: "
-						+ cashier.log.toString(), 0, cashier.log.size());
+		assertEquals("Cashier should have 2 markets in it. It doesn't.",cashier.Markets.size(), 2);	
+		
+		
+		assertEquals("Cook should have 2 markets in it.  It doesn't.",cook.Markets.size(),2);
+		assertEquals("Cook should have 0 steak in it.  It doesn't.",cook.inventory.GetAmountOf("Steak"), 0);
+		
+		assertEquals("Market1 should have no bill.  It does.", market1.owed,0.00);
+		
+		//step 1 - restock
+		cook.Restock("Steak", 3);
+		assertEquals("Market1 should have a bill.  It doesn't.", market1.owed,3*9.99);
+		assertEquals("Cashier should have no bill for market1, it does.",cashier.Markets.get(0).GetBill(), 0.00);
+		//assert it worked
+		
+		//step 2 - 
+		market1.SendBill();
+		assertEquals("Cashier should have a bill for market1, it doesn't.",cashier.Markets.get(0).GetBill(),3*9.99);
+		
+		//step 3 - pay bill
+		cashier.PayMarket(cashier.Markets.get(0));
+		assertFalse("Cashier should have paid the bill.  It hasn't.",cashier.CASHMONEY==100);
+		assertEquals("Cashier should have nothave a bill for market1, it does.",cashier.Markets.get(0).GetBill(),0.00);
+		assertEquals("Market1 should not have a bill.  It does.", market1.owed, 0.00);
+		
+		//test one complete
+
+	}
+	
+	public void testTwoNormalMarketScenario()
+	{
+		try {
+			setUp();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		customer.cashier = cashier;
+		market1.cashier = cashier;
+		market2.cashier = cashier;
+		waiter.cashier = cashier;
+		cook.AddMarket(market1);
+		cook.AddMarket(market2);
+		cashier.addMarket(market1);
+		cashier.addMarket(market2);
+		market1.SetCook(cook);
+		market2.SetCook(cook);
+		cashier.CASHMONEY = 100;
+		
+		//assert everything is in default state
+		assertEquals("Cashier should have 0 customers in it. It doesn't.",cashier.Customers.size(), 0);		
+		assertEquals("Cashier should have 2 markets in it. It doesn't.",cashier.Markets.size(), 2);	
+		
+		
+		assertEquals("Cook should have 2 markets in it.  It doesn't.",cook.Markets.size(),2);
+		assertEquals("Cook should have 0 steak in it.  It doesn't.",cook.inventory.GetAmountOf("Steak"), 0);
+		
+		assertEquals("Market1 should have no bill.  It does.", market1.owed,0.00);
+		
+		//step 1 - restock
+		cook.Restock("Steak", 3);
+		assertEquals("Market1 should have a bill.  It doesn't." + market1.owed, market1.owed,3*9.99);
+		assertEquals("Cashier should have no bill for market1, it does.",cashier.Markets.get(0).GetBill(), 0.00);
+		assertEquals("Market1 is not out of steak, it should be.", market1.inventory.GetAmountOf("Steak"),0);
+		//assert it worked
+		cook.Restock("Steak", 3);
+		assertEquals("Market2 should have a bill.  It doesn't." + market2.owed, market2.owed,3*9.99);
+		assertEquals("Cashier should have no bill for market2, it does.",cashier.Markets.get(1).GetBill(), 0.00);
+		assertEquals("Market2 is not out of steak, it should be.", market2.inventory.GetAmountOf("Steak"),0);
+		
+		//step 2 - 
+		market1.SendBill();
+		assertEquals("Cashier should have a bill for market1, it doesn't.",cashier.Markets.get(0).GetBill(),3*9.99);
+		market2.SendBill();	
+		assertEquals("Cashier should have a bill for market2, it doesn't.",cashier.Markets.get(1).GetBill(),3*9.99);
+
+		
+		//step 3 - pay bill
+		//cashier.PayMarket(cashier.Markets.get(0));
+		cashier.pickAndExecuteAnAction();
+		assertFalse("Cashier should have paid the bill.  It hasn't.",cashier.CASHMONEY==100);
+		assertEquals("Cashier should have not have a bill for market1, it does.",cashier.Markets.get(0).GetBill(),0.00);
+		assertEquals("Market1 should not have a bill.  It does.", market1.owed, 0.00);
+		cashier.pickAndExecuteAnAction();
+		assertEquals("Cashier should have not have a bill for market2, it does.",cashier.Markets.get(1).GetBill(),0.00);
+		assertEquals("Market2 should not have a bill.  It does.", market2.owed, 0.00);
+		//test one complete
+
+	}
+}
+
+		
+
+
+		
 		//ThisGuy = new MyCustomers(customer, 0);
-		cashier.msgCheckPlease(customer, 0,6.99);
+		//cashier.msgCheckPlease(customer, 0,6.99);
 		//cashier.GiveBillToWaiter(ThisGuy);
 		
 	/*	//setUp() runs first before this test!
@@ -121,8 +233,8 @@ public class CashierTest extends TestCase
 		assertFalse("Cashier's scheduler should have returned false (no actions left to do), but didn't.", 
 				cashier.pickAndExecuteAnAction());
 		
-*/
+
 	}//end one normal customer scenario
 	
 	
-}
+}*/

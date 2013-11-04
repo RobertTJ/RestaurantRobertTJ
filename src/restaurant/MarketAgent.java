@@ -66,7 +66,7 @@ public class MarketAgent extends Agent implements Market{
 	// Messages
 	
 	public void msgPayingBill(double b) {
-		owed = owed + b;
+		owed = owed - b;
 		BillPending = false;
 		stateChanged();
 	}

@@ -1,9 +1,14 @@
 package restaurant.test.mock;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import restaurant.CashierAgent.Check;
+//import restaurant.MarketAgent.Order;
 import restaurant.CustomerAgent;
 import restaurant.MarketAgent;
 //import restaurant.MarketAgent.Food;
@@ -31,13 +36,17 @@ public String name;
 	public Host host;
 	public Cook cook;
 	public Cashier cashier;
-	Timer timer = new Timer();
-	double owed=0.00;
+	public double owed=0.00;
 	boolean BillPending = false;
 
+	public List<Order> allOrders
+	= Collections.synchronizedList(new ArrayList<Order>());
 	
+	public Inventory inventory = new Inventory();
 	
-	Inventory inventory = new Inventory();
+	public void SetCook(Cook c) {
+		this.cook=c;
+	}
 	
 	public MockMarket(String name) {
 		super(name);
@@ -46,24 +55,78 @@ public String name;
 
 		this.name = name;
 		
-		inventory.AddMore ("Pizza", 5);
-		inventory.AddMore ("Steak", 5);
-		inventory.AddMore ("Salad", 5);
-		inventory.AddMore ("Chicken", 5);
+		inventory.AddMore ("Pizza", 3);
+		inventory.AddMore ("Steak", 3);
+		inventory.AddMore ("Salad", 3);
+		inventory.AddMore ("Chicken", 3);
 	}
 
 	@Override
 	public void msgPayingBill(double b) {
-		// TODO Auto-generated method stub
-		
+		owed = owed - b;
+		BillPending = false;		
 	}
 
 	@Override
-	public void msgNewOrders(String type, int i) {
-		// TODO Auto-generated method stub
+	public void msgNewOrders(String order, int amount) {
+		allOrders.add(new Order(amount, order));	
 		
+		if (amount<inventory.AmountOfSteak) {
+			FullfillOrder(allOrders.get(0));
+		}
+		else {
+			CanNotFullfillOrder(allOrders.get(0));
+		}
+	}
+	
+	public void SendBill() {
+		cashier.msgFoodBill(this, owed);
 	}
 
+	
+	public void FullfillOrder( Order o) {
+
+		inventory.OrderAmount(o.getOrder().getChoice(), o.getAmount());
+		allOrders.remove(o);
+		
+
+				cook.msgOrderFullfilled(o.getOrder().getChoice(), o.getAmount());
+		
+		if (o.getOrder().getChoice() == "Steak") {
+			owed = o.getAmount() * 9.99;
+		}
+		else if (o.getOrder().getChoice() == "Chicken") {
+			owed = o.getAmount() * 7.99;		}
+		else if (o.getOrder().getChoice() == "Salad") {
+			owed = o.getAmount() * 2.99;		}
+		else {
+			owed = o.getAmount() * 5.99;		}
+	}
+	
+	
+	public void CanNotFullfillOrder( Order o) {
+		int thisorder = inventory.GetAmountOf(o.getOrder().getChoice());
+		
+		allOrders.remove(o);
+
+		
+	cook.msgCanNotFullfillOrder(o.getOrder().getChoice(), o.getAmount(), inventory.GetAmountOf(o.getOrder().getChoice()), this);
+				
+				inventory.OrderAmount(o.getOrder().getChoice(), inventory.GetAmountOf(o.getOrder().getChoice()));
+
+	
+		if (o.getOrder().getChoice() == "Steak") {
+			owed = 3 * 9.99;
+		}
+		else if (o.getOrder().getChoice() == "Chicken") {
+			owed = thisorder * 7.99;		}
+		else if (o.getOrder().getChoice() == "Salad") {
+			owed = thisorder * 2.99;		}
+		else {
+			owed = thisorder * 5.99;		}
+	}
+	
+	
 	private class Food {
 		String choice;
 		int cooktime;
