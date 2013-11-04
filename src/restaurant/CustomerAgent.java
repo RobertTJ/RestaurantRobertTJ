@@ -1,6 +1,7 @@
 package restaurant;
 
 import restaurant.CashierAgent.Check;
+import restaurant.WaiterAgent.AgentState;
 import restaurant.WaiterAgent.Menu;
 import restaurant.gui.CustomerGui;
 import restaurant.gui.RestaurantGui;
@@ -12,6 +13,7 @@ import agent.Agent;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Semaphore;
 
 /**
  * Restaurant customer agent.
@@ -25,6 +27,9 @@ public class CustomerAgent extends Agent implements Customer {
 	private Menu menu;
 	private double Wallet;
 	private double bill=0.00;
+	
+	private Semaphore atHost = new Semaphore(0,true);
+	private Semaphore atWait = new Semaphore(0,true);
 
 	// agent correspondents
 	private HostAgent host;
@@ -32,6 +37,7 @@ public class CustomerAgent extends Agent implements Customer {
 	private Cashier cashier;
 	int select;
 	int payday=0;
+	int xWait = 30, yWait = 120;
 
 	//    private boolean isHungry = false; //hack for gui
 	public enum AgentState
@@ -58,6 +64,11 @@ public class CustomerAgent extends Agent implements Customer {
 	 * hack to establish connection to Host agent.
 	 */
 	
+	public void setWaitSpot(int x, int y) {
+		xWait = x;
+		yWait = y;
+	}
+	
 	public void setHost(HostAgent host) {
 		this.host = host;
 	}
@@ -78,6 +89,12 @@ public class CustomerAgent extends Agent implements Customer {
 		return name;
 	}
 	// Messages
+	
+	public void msgAtHost() {
+		atHost.release();
+		stateChanged();
+	}
+	
 	@Override
 	public void gotHungry() {//from animation
 		print("I'm hungry");
@@ -225,6 +242,16 @@ public class CustomerAgent extends Agent implements Customer {
 
 	private void goToRestaurant() {
 		Do("Going to restaurant");
+		
+		customerGui.DoGoToHost();
+		try {
+			atHost.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.state=AgentState.WaitingInRestaurant;		
+		
 		if ( bill != 0.00 && Wallet > bill) {
 			//if money is owed, pay
 			cashier.msgPayingMyBill(this, bill);
@@ -241,6 +268,9 @@ public class CustomerAgent extends Agent implements Customer {
 		else {
 			host.msgIWantFood(this);//send our instance, so he can respond to us
 		}
+		
+		customerGui.DoGoToWaitArea(xWait, yWait);
+		
 	}
 
 	private void SitDown() {

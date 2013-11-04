@@ -9,11 +9,10 @@ import java.awt.*;
 
 public class HostGui implements Gui {
 
-    private HostAgent wagent = null;
-    private WaiterAgent agent = null;
+    private HostAgent agent = null;
 
-    private int xPos = -20, yPos = -20;//default waiter position
-    private int xDestination = -20, yDestination = -20;//default start position
+    private int xPos = 100, yPos = 50;//default waiter position
+    private int xDestination = 100, yDestination = 50;//default start position
     private int shifttwenty = 20;
 
     public static final int xTable1 = 200;
@@ -26,50 +25,11 @@ public class HostGui implements Gui {
     public static final int yTable3 = 250;
 
     public HostGui(HostAgent agent) {
-        this.wagent = agent;
-    }
-    
-    public HostGui(WaiterAgent agent) {
         this.agent = agent;
-    }
-
-
-   /* public HostGui(WaiterAgent agent) {
-        this.agent = agent;
-    }*/
-
-    
-    public void updatePosition() {
-        if (xPos < xDestination)
-            xPos++;
-        else if (xPos > xDestination)
-            xPos--;
-
-        if (yPos < yDestination)
-            yPos++;
-        else if (yPos > yDestination)
-            yPos--;
-
-        if (xPos == xDestination && yPos == yDestination
-        		& (xDestination == xTable1 + shifttwenty) & (yDestination == yTable1 - shifttwenty)) {
-           agent.msgAtTable();
-        }
-        else if (xPos == xDestination && yPos == yDestination
-        		& (xDestination == xTable2 + shifttwenty) & (yDestination == yTable2 - shifttwenty)) {
-           agent.msgAtTable();
-        }
-        else if (xPos == xDestination && yPos == yDestination
-        		& (xDestination == xTable3 + shifttwenty) & (yDestination == yTable3 - shifttwenty)) {
-           agent.msgAtTable();
-        }
-        else if (xPos == xDestination && yPos == yDestination
-        		& (xDestination ==-shifttwenty) & (yDestination == - shifttwenty)) {
-           agent.msgAtFront();
-        }
     }
 
     public void draw(Graphics2D g) {
-        g.setColor(Color.MAGENTA);
+        g.setColor(Color.CYAN);
         g.fillRect(xPos, yPos, shifttwenty, shifttwenty);
     }
 
@@ -113,4 +73,10 @@ public class HostGui implements Gui {
     public int getYPos() {
         return yPos;
     }
+
+	@Override
+	public void updatePosition() {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -527,7 +527,7 @@ public class WaiterAgent extends Agent implements Waiter{
 	}
 
 	private void seatCustomer() {
-		waiterGui.DoGoToFront();
+		waiterGui.DoGoToCustomer();
 		try {
 			atFront.acquire();
 		} catch (InterruptedException e) {

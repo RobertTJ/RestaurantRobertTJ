@@ -13,7 +13,7 @@ public class CookGui implements Gui {
 
     private CookAgent agent = null;
     private String order;
-    private enum orderState {noOrder, takingOrderToCook, TakingFoodToCustomer};
+    private enum orderState {noOrder, TakingFoodToCounter};
     
     orderState OrderState = orderState.noOrder;
 
@@ -65,30 +65,18 @@ public class CookGui implements Gui {
         else if (xPos == xDestination && yPos == yDestination
         		& (xDestination == xCounter) & (yDestination == yCounter)) {
            agent.msgAtCounter();
+           OrderState = orderState.noOrder;
         }
         else if (xPos == xDestination && yPos == yDestination
         		& (xDestination == xFridge-40) & (yDestination == yFridge)) {
            agent.msgAtFridge();
         }
-        /*
-        else if (xPos == xDestination && yPos == yDestination
-        		&& (xDestination == xHome) && (yDestination == yHome)) {
-           agent.msgAtFront();
-        }
-        else if (xPos == xDestination && yPos == yDestination
-        		&& (xDestination == xWait) && (yDestination == yWait)) {
-           agent.msgAtCust();
-        }
-        else if (xPos == xDestination && yPos == yDestination
-        		& (xDestination == cookX) & (yDestination == cookY)) {
-           agent.msgAtCook();
-        }
-        */
+
     }
     
-    public void DoGoToCounter() {
-    	//order=choice;
-    	//OrderState=orderState.takingOrderToCook;
+    public void DoGoToCounter(String o) {
+    	order = o; 
+    	OrderState=orderState.TakingFoodToCounter;
     	xDestination=xCounter;//+20;
     	yDestination=yCounter;
     }
@@ -117,9 +105,10 @@ public class CookGui implements Gui {
         g.setColor(Color.BLUE);
         g.fillRect(xFridge-shifttwenty, yFridge-shifttwenty, shifttwenty, shifttwenty*3);
 		g.setColor(Color.BLACK);
-        if (OrderState == orderState.TakingFoodToCustomer) {
-        //	g.drawString(order, xPos, yPos);
+        if (OrderState == orderState.TakingFoodToCounter) {
+        	//g.drawString(order, xPos, yPos);
         }
+        
     }
 
     public boolean isPresent() {

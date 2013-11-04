@@ -20,7 +20,7 @@ public class WaiterGui implements Gui {
     private int xDestination = -20, yDestination = -20;//default start position
     private int xHome = -20, yHome = -20;
     private int shifttwenty = 20;
-    private int xWait  = -20, yWait = -20;
+    private int xWait  = 30+20, yWait = 120;
 
     public static final int xTable1 = 200;
     public static final int yTable1 = 250;
@@ -134,6 +134,11 @@ public class WaiterGui implements Gui {
     public void DoGoToFront() {
     	xDestination = -20;
     	yDestination = -20;
+    }
+    
+    public void DoGoToCustomer() {
+    	xDestination = xWait;
+    	yDestination = yWait;
     }
     
     public void DoGoToTable(Customer customer, int n) {

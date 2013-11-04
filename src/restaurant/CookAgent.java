@@ -189,7 +189,7 @@ public class CookAgent extends Agent {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				gui.DoGoToCounter();
+				gui.DoGoToCounter(order.getOrder().getChoice());
 				try {
 					atCounter.acquire();
 				} catch (InterruptedException e) {

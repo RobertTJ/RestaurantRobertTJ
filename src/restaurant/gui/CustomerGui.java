@@ -22,7 +22,7 @@ public class CustomerGui implements Gui{
 
 	private int xPos, yPos;
 	private int xDestination, yDestination;
-	private enum Command {noCommand, GoToSeat, LeaveRestaurant};
+	private enum Command {noCommand, GoToSeat, LeaveRestaurant, GoToHost, GoToWaitArea};
 	private Command command=Command.noCommand;
 	private int offscreenfourty = -40;
 	private int shifttwenty = 20;
@@ -35,7 +35,12 @@ public class CustomerGui implements Gui{
     FoodState Food = FoodState.noFood;
 
     
-
+    private int xHost=80;
+    private int yHost=50;
+    
+    private int xWait;
+    private int yWait;
+    
 	public static final int xTable = 200;
 	public static final int yTable = 250;
 
@@ -67,6 +72,9 @@ public class CustomerGui implements Gui{
 				//System.out.println("about to call gui.setCustomerEnabled(agent);");
 				isHungry = false;
 				gui.setCustomerEnabled(agent);
+			}
+			else if (command == Command.GoToHost) {
+				agent.msgAtHost();
 			}
 			command=Command.noCommand;
 		}
@@ -106,6 +114,17 @@ public class CustomerGui implements Gui{
 		//yDestination = yTable;
 		command = Command.GoToSeat;
 
+	}
+	
+	public void DoGoToHost() {
+		xDestination = xHost;
+		yDestination = yHost;
+		command = Command.GoToHost;
+	}
+	
+	public void DoGoToWaitArea(int x, int y) {
+		xDestination = x;
+		yDestination = y;
 	}
 	
 	public void EatTime(String choice) {
