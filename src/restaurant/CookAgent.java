@@ -33,6 +33,7 @@ public class CookAgent extends Agent implements Cook{
 	private Semaphore atFridge = new Semaphore(0,true);
 	private Semaphore atCounter = new Semaphore(0,true);
 	private Semaphore atGrill = new Semaphore(0,true);
+	private Semaphore atCenter = new Semaphore(0,true);
 
 	
 	//public HostGui hostGui = null;
@@ -101,8 +102,17 @@ public class CookAgent extends Agent implements Cook{
 	public String getName() {
 		return name;
 	}
+	
+	public void msgPickedUp(int t) {
+		gui.PickedUp(t);
+	}
 
 	// Messages
+	@Override
+	public void msgAtCenter() {
+		atCenter.release();
+		stateChanged();
+	}
 	@Override
 	public void msgAtCounter() {
 		atCounter.release();
@@ -193,23 +203,10 @@ public class CookAgent extends Agent implements Cook{
 		synchronized(allOrders) {
 		for (Order order : allOrders){
 			if(order.state==CookState.done) {
-				gui.DoGoToGrill();
-				try {
-					atGrill.acquire();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				gui.DoGoToCounter(order.getOrder().getChoice());
-				try {
-					atCounter.acquire();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				
 				order.setStateOut();
 				callWaiter(order);
-				gui.DoGoToCenter();
+				
 				return true;
 			}
 		}
@@ -249,23 +246,9 @@ public class CookAgent extends Agent implements Cook{
 		synchronized(allOrders){
 		for (Order order : allOrders){
 			if(order.state==CookState.pending && inventory.GetAmountOf(order.order.getChoice()) > 0) {
-				gui.DoGoToFridge();
-				try {
-					atFridge.acquire();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				gui.DoGoToGrill();
-				try {
-					atGrill.acquire();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				
 				order.setStateCooking();
 				Cook(order);
-				gui.DoGoToCenter();
 				
 				return true;
 			}
@@ -339,16 +322,54 @@ public class CookAgent extends Agent implements Cook{
 	}
 	
 	private void callWaiter(Order o) {
+		gui.DoGoToGetFood(o.getTableNumber());
+		try {
+			atGrill.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		gui.DoGoToCounter(o.getOrder().getChoice(), o.getTableNumber());
+		try {
+			atCounter.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		o.getWaiter().msgOrderReady(o.order.getChoice(), o.getTableNumber());
+		gui.DoGoToCenter();
+		try {
+			atCenter.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		stateChanged();
 	}
 	
 	private void Cook(final Order o) {	
+		
+		
 		inventory.CookOneOf(o.order.getChoice());
 		print("There are " + inventory.GetAmountOf(o.order.getChoice()) +" " + o.order.getChoice() + "left now");
 		
 		if (inventory.GetAmountOf(o.order.getChoice())==0) {
 			Restock(o.getOrder().getChoice());
+		}
+		
+		gui.DoGoToFridge(o.getOrder().getChoice(), o.getTableNumber());
+		try {
+			atFridge.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		gui.DoGoToGrill(o.getTableNumber());
+		try {
+			atGrill.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		print("Started cooking " + o.order.getChoice());
@@ -364,6 +385,14 @@ public class CookAgent extends Agent implements Cook{
 		},
 		o.order.cooktime);
 		
+		gui.DoGoToCenter();
+		try {
+			atCenter.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		stateChanged();
 	}
 
 	//Extra

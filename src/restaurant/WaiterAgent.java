@@ -660,7 +660,7 @@ public class WaiterAgent extends Agent implements Waiter{
 		}
     	waiterGui.BringFoodToCustomer(current.getCustomer(), current.getTableNumber(),current.getOrder());
     	//print("Order Ready " + atTable);
-
+    	cook.msgPickedUp(current.getTableNumber());
     	try {
 			atTable.acquire();
 		} catch (InterruptedException e) {

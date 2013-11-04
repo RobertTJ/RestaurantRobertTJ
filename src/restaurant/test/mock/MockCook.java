@@ -57,6 +57,12 @@ public class MockCook extends Mock implements Cook {
 		
 	}
 
+	@Override
+	public void msgAtCenter() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 
 }

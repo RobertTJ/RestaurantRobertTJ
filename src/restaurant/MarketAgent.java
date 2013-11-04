@@ -214,7 +214,7 @@ public class MarketAgent extends Agent implements Market{
 		int AmountOfPizza;
 		int AmountOfSalad;
 		
-		Inventory() {
+		public Inventory() {
 			AmountOfChicken = 0;
 			AmountOfSteak = 0;
 			AmountOfPizza = 0;

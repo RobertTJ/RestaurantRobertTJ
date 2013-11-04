@@ -12,6 +12,7 @@ import restaurant.WaiterAgent.MyCustomers;
 
 
 public interface Cook {
+	public abstract void msgAtCenter();
 	public abstract void msgAtCounter();
 	public abstract void msgAtGrill();
 	

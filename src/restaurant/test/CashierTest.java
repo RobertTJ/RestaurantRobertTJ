@@ -5,6 +5,7 @@ import restaurant.WaiterAgent;
 import restaurant.WaiterAgent.MyCustomers;
 import restaurant.MarketAgent;
 import restaurant.test.mock.MockCustomer;
+import restaurant.test.mock.MockMarket;
 import restaurant.test.mock.MockWaiter;
 import junit.framework.*;
 
@@ -13,10 +14,10 @@ public class CashierTest extends TestCase
 {
 	//these are instantiated for each test separately via the setUp() method.
 	CashierAgent cashier;
-	MockWaiter w;
+	MockWaiter waiter;
 	MockCustomer customer;
 	MyCustomers ThisGuy;
-	WaiterAgent waitman = new WaiterAgent("Tim");
+	MockMarket market;
 	
 	
 	/**
@@ -27,7 +28,8 @@ public class CashierTest extends TestCase
 		super.setUp();		
 		cashier = new CashierAgent("cashier");		
 		customer = new MockCustomer("mockcustomer");		
-		w = new MockWaiter("mockwaiter");
+		waiter = new MockWaiter("mockwaiter");
+		market = new MockMarket("mockmarket");
 	}	
 	/**
 	 * This tests the cashier under very simple terms: one customer is ready to pay the exact bill.
@@ -35,6 +37,9 @@ public class CashierTest extends TestCase
 	public void testOneNormalCustomerScenario()
 	{
 		customer.cashier = cashier;
+		market.cashier = cashier;
+		waiter.cashier = cashier;
+		
 		assertEquals("Cashier should have 0 customers in it. It doesn't.",cashier.Customers.size(), 0);		
 		assertEquals("CashierAgent should have an empty event log before the Cashier's HereIsBill is called. Instead, the Cashier's event log reads: "
 						+ cashier.log.toString(), 0, cashier.log.size());
