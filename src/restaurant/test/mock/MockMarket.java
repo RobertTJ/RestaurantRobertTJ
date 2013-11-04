@@ -126,7 +126,6 @@ public String name;
 			owed = thisorder * 5.99;		}
 	}
 	
-	
 	private class Food {
 		String choice;
 		int cooktime;
