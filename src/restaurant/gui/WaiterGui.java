@@ -31,8 +31,8 @@ public class WaiterGui implements Gui {
     public static final int xTable3 = 640;
     public static final int yTable3 = 250;
     
-    public static final int cookX = 900;
-    public static final int cookY = 150;
+    public static final int cookX = 560;
+    public static final int cookY = 50;
 
     public WaiterGui(WaiterAgent agent) {
         this.agent = agent;

@@ -1,12 +1,11 @@
 package restaurant;
 
 import agent.Agent;
-import restaurant.gui.HostGui;
+import restaurant.gui.CookGui;
 import restaurant.HostAgent;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,12 +23,17 @@ public class CookAgent extends Agent {
 	HostAgent host;
 	
 	boolean PayingAttention = true;
+	private Semaphore atFridge = new Semaphore(0,true);
+	private Semaphore atCounter = new Semaphore(0,true);
+	private Semaphore atGrill = new Semaphore(0,true);
 
 	
 	//public HostGui hostGui = null;
 	
 	public enum CookState {pending, cooking, done, out, outoffood};
 	Timer timer = new Timer();
+	
+	CookGui gui= null;
 
 	public CookAgent(String name) {
 		super();
@@ -77,6 +81,10 @@ public class CookAgent extends Agent {
 		stateChanged();
 	}
 	
+	public void setGui(CookGui g) {
+		this.gui = g;
+	}
+	
 	public String getMaitreDName() {
 		return name;
 	}
@@ -86,6 +94,21 @@ public class CookAgent extends Agent {
 	}
 
 	// Messages
+	
+	public void msgAtCounter() {
+		atCounter.release();
+		stateChanged();
+	}
+	
+	public void msgAtGrill() {
+		atGrill.release();
+		stateChanged();
+	}
+	
+	public void msgAtFridge() {
+		atFridge.release();
+		stateChanged();
+	}
 	
 	public void msgNewOrder(WaiterAgent waiter, int table, String order) {
 		allOrders.add(new Order(waiter,table, order));
@@ -159,9 +182,23 @@ public class CookAgent extends Agent {
 		
 		for (Order order : allOrders){
 			if(order.state==CookState.done) {
+				gui.DoGoToGrill();
+				try {
+					atGrill.acquire();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				gui.DoGoToCounter();
+				try {
+					atCounter.acquire();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				order.setStateOut();
 				callWaiter(order);
-				
+				gui.DoGoToCenter();
 				return true;
 			}
 		}
@@ -197,9 +234,23 @@ public class CookAgent extends Agent {
 		
 		for (Order order : allOrders){
 			if(order.state==CookState.pending && inventory.GetAmountOf(order.order.getChoice()) > 0) {
+				gui.DoGoToFridge();
+				try {
+					atFridge.acquire();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				gui.DoGoToGrill();
+				try {
+					atGrill.acquire();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				order.setStateCooking();
 				Cook(order);
-				
+				gui.DoGoToCenter();
 				
 				return true;
 			}

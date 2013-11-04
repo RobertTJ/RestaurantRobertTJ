@@ -46,7 +46,7 @@ public class MockCustomer extends Mock implements Customer {
 	}
 	
 	public  void msgHereIsYourBill(Check k){
-		cashier.msgPayingMyBill(this);
+		//cashier.msgPayingMyBill(this);
 	}
 	
 	public  void msgFollowMeToTable(Waiter w, Menu m){
